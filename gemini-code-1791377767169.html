@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Password Generator Quiz (20 Questions)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --accent: #f59e0b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        code, pre {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.92em;
+            color: #0284c7;
+            display: inline-block;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+            color: white;
+            padding: 26px 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.25);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 1.7rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            color: #e0f2fe;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: block;
+        }
+
+        .stat-val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-val.high {
+            color: var(--accent);
+        }
+
+        /* Index Button */
+        .btn-index {
+            background: #f0f9ff;
+            color: var(--primary);
+            border: 2px solid #bae6fd;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-index:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s ease;
+        }
+
+        /* Question Box */
+        .q-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 10px 20px -3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .q-badge {
+            background: #f0f9ff;
+            color: var(--primary);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .q-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .opt-btn {
+            background: #f8fafc;
+            border: 2px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            text-align: left;
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            background: #f0f9ff;
+            border-color: #7dd3fc;
+            transform: translateX(4px);
+        }
+
+        .opt-btn.correct {
+            background: #dcfce7 !important;
+            border-color: var(--success) !important;
+            color: #15803d !important;
+        }
+
+        .opt-btn.wrong {
+            background: #fee2e2 !important;
+            border-color: var(--danger) !important;
+            color: #991b1b !important;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: none;
+            background: #f1f5f9;
+            border-left: 5px solid var(--primary);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .btn-nav {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-nav:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-nav:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Modal Index */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 750px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 26px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            animation: popIn 0.25s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: #f1f5f9;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+
+        .close-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        .grid-index {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .index-pill {
+            background: #f8fafc;
+            border: 2px solid var(--border);
+            padding: 10px 4px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: #334155;
+        }
+
+        .index-pill:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+            transform: translateY(-2px);
+        }
+
+        .index-pill.active {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+            font-weight: 900;
+        }
+
+        .index-pill.solved-correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+
+        .index-pill.solved-wrong {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+
+        /* Results Card */
+        .results-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .trophy {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #f0f9ff;
+            border: 6px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+        }
+
+        .score-num {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .btn-restart {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 14px 34px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: 0.2s;
+        }
+
+        .btn-restart:hover {
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Python: Random Password Generator Quiz (20 Questions)</h1>
+        <p>Comprehensive assessment on string module, random module, loops, and list manipulation</p>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-label">Question</span>
+            <div><span class="stat-val" id="qCurrent">1</span> / 20</div>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">1st Attempt Score 🎯</span>
+            <span class="stat-val" style="color: #0284c7;" id="firstScore">--</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Current Score</span>
+            <span class="stat-val" id="score">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">High Score 🏆</span>
+            <span class="stat-val high" id="highScore">0</span>
+        </div>
+        <div>
+            <button class="btn-index" onclick="openIndexModal()">
+                <span>📑</span>
+                <span>Question Index (1-20)</span>
+            </button>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- Question Box -->
+    <div class="q-card" id="quizCard">
+        <div class="q-header">
+            <span class="q-badge" id="topicBadge">Topic</span>
+            <span style="color: var(--text-muted); font-size: 0.9rem;" id="qStatusIndicator">Not answered</span>
+        </div>
+        
+        <div class="q-text" id="questionText">Loading question...</div>
+        <div class="options-list" id="optionsContainer"></div>
+        <div class="explanation" id="explanationText"></div>
+
+        <div class="actions">
+            <button class="btn-nav" id="prevBtn" onclick="prevQuestion()" disabled>⬅️ Previous</button>
+            <button class="btn-nav" id="nextBtn" onclick="nextQuestion()">Next ➡️</button>
+        </div>
+    </div>
+
+    <!-- Results Box -->
+    <div class="results-card" id="resultsCard">
+        <div class="trophy" id="trophyIcon">🎉</div>
+        <h2 id="resultMsg" style="font-size: 1.8rem; margin-bottom: 8px;">Well Done!</h2>
+        <p id="resultSubtitle" style="color: var(--text-muted);">You completed all 20 Python Password Generator questions!</p>
+        
+        <div class="score-circle">
+            <div class="score-num" id="finalScore">0</div>
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">/ 20</span>
+        </div>
+
+        <p id="highScoreNotice" style="font-weight: 700; font-size: 1.1rem; color: var(--accent); margin-top: 10px;"></p>
+
+        <button class="btn-restart" onclick="restartQuiz()">Retake Quiz 🔄</button>
+    </div>
+</div>
+
+<!-- Modal Index Window -->
+<div class="modal-overlay" id="indexModal" onclick="closeIndexModalOnOutside(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📑 Question Index Navigator</h3>
+            <button class="close-btn" onclick="closeIndexModal()">✕</button>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div><span>Correct</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div><span>Incorrect</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background: #0284c7;"></div><span>Current</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background: #e2e8f0; border: 1px solid #cbd5e1;"></div><span>Unanswered</span></div>
+        </div>
+
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Click any question number to navigate directly:</p>
+        
+        <div class="grid-index" id="gridIndexContainer"></div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            topic: "string.ascii_letters",
+            q: "What does the constant string.ascii_letters contain?",
+            options: [
+                "Only lowercase letters from 'a' to 'z'",
+                "Both lowercase and uppercase English letters ('a'-'z' and 'A'-'Z')",
+                "Letters and numeric digits combined",
+                "ASCII codes formatted as integers"
+            ],
+            correct: 1,
+            exp: "string.ascii_letters is the concatenation of string.ascii_lowercase ('a'-'z') and string.ascii_uppercase ('A'-'Z')."
+        },
+        {
+            topic: "string.digits",
+            q: "What is the return value and data type of string.digits?",
+            options: [
+                "A string containing '0123456789'",
+                "A list of integers [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+                "A tuple containing hex digits",
+                "An integer representing the total count of numbers"
+            ],
+            correct: 0,
+            exp: "string.digits is a string constant defined as '0123456789'."
+        },
+        {
+            topic: "string.punctuation",
+            q: "What character set is stored inside string.punctuation?",
+            options: [
+                "Alphabetical vowel characters",
+                "Whitespace characters like space and tab",
+                "A string of all ASCII punctuation and symbol characters",
+                "Control characters like newline \\n"
+            ],
+            correct: 2,
+            exp: "string.punctuation contains all standard ASCII symbols and punctuation marks such as !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~."
+        },
+        {
+            topic: "input() & int()",
+            q: "Why is int() wrapped around input() in int(input('Enter the number of letters: '))?",
+            options: [
+                "To encrypt the user's input string",
+                "Because input() returns a string, which must be cast to an integer for range() loops",
+                "To round floating-point numbers to integers",
+                "To prevent the user from typing negative values"
+            ],
+            correct: 1,
+            exp: "In Python 3, input() always returns a string. int() converts it to an integer so range() can use it as a loop count."
+        },
+        {
+            topic: "random.choice()",
+            q: "What does random.choice(letters) perform in the loop?",
+            options: [
+                "Selects and returns a single random element from the sequence 'letters'",
+                "Shuffles all characters inside 'letters'",
+                "Deletes a random letter from the sequence",
+                "Generates a random float between 0 and 1"
+            ],
+            correct: 0,
+            exp: "random.choice(seq) returns a single pseudo-random item from a non-empty sequence."
+        },
+        {
+            topic: "Loop String Concatenation",
+            q: "In the statement password += random.choice(letters), what does += do?",
+            options: [
+                "Multiplies the existing string by the new character",
+                "Appends the selected random character to the end of the password string",
+                "Replaces the previous password with only the new character",
+                "Converts the character into an integer"
+            ],
+            correct: 1,
+            exp: "+= performs string concatenation, appending each randomly chosen character to the existing password."
+        },
+        {
+            topic: "range() Function",
+            q: "If no_of_letters is 4, how many times will for x in range(no_of_letters) execute?",
+            options: [
+                "3 times",
+                "5 times",
+                "4 times (with x taking values 0, 1, 2, 3)",
+                "Infinitely until stopped"
+            ],
+            correct: 2,
+            exp: "range(4) produces a sequence [0, 1, 2, 3], which iterates exactly 4 times."
+        },
+        {
+            topic: "Initial State",
+            q: "Why is password initialized to an empty string password = '' before the loops?",
+            options: [
+                "To clear the computer's memory cache",
+                "To serve as an empty accumulator to append characters during iterations",
+                "To specify that the password should not contain spaces",
+                "It is mandatory by Python syntax before importing libraries"
+            ],
+            correct: 1,
+            exp: "Initializing password = '' provides an empty string accumulator to build upon in subsequent loop iterations."
+        },
+        {
+            topic: "Sequential Loops",
+            q: "Before calling random.shuffle(), what is the structure of the generated password string?",
+            options: [
+                "Characters are completely scrambled from the start",
+                "All letters first, followed by all digits, then all symbols in order",
+                "Symbols first, followed by digits, then letters",
+                "Alternating pattern: letter, digit, symbol, letter, digit, symbol"
+            ],
+            correct: 1,
+            exp: "Because the loops execute sequentially (letters, then digits, then symbols), the un-shuffled string has grouped blocks in that exact order."
+        },
+        {
+            topic: "list(password) Conversion",
+            q: "Why is password converted to a list via password = list(password) before shuffling?",
+            options: [
+                "Because Python strings are immutable and cannot be shuffled in-place",
+                "To convert ASCII characters into hexadecimal format",
+                "To double the length of the password",
+                "To sort the characters alphabetically"
+            ],
+            correct: 0,
+            exp: "Strings in Python are immutable. random.shuffle() modifies sequences in-place, which requires a mutable type like a list."
+        },
+        {
+            topic: "random.shuffle() Mechanism",
+            q: "What does random.shuffle(password) do and what does it return?",
+            options: [
+                "Returns a new sorted list",
+                "Shuffles the list in-place and returns None",
+                "Returns a string with scrambled letters",
+                "Shuffles only the vowels in the list"
+            ],
+            correct: 1,
+            exp: "random.shuffle() shuffles the elements of the mutable sequence in-place and returns None."
+        },
+        {
+            topic: "str.join() Method",
+            q: "What is the purpose of password = ''.join(password)?",
+            options: [
+                "Splits the string wherever an empty space occurs",
+                "Converts the list of individual characters back into a single unified string",
+                "Deletes all whitespace and symbols from the password",
+                "Replaces empty characters with punctuation marks"
+            ],
+            correct: 1,
+            exp: "''.join(iterable) joins all list elements into a single cohesive string using an empty separator."
+        },
+        {
+            topic: "Separator in join()",
+            q: "What would happen if '-' was used instead: '-'.join(['a', 'b', 'c'])?",
+            options: [
+                "It produces 'abc'",
+                "It produces 'a-b-c'",
+                "It raises a TypeError",
+                "It subtracts characters mathematically"
+            ],
+            correct: 1,
+            exp: "The string before .join() defines the delimiter placed between elements, yielding 'a-b-c'."
+        },
+        {
+            topic: "Total Password Length",
+            q: "If the user enters 5 letters, 3 digits, and 2 symbols, what is the final password length?",
+            options: [
+                "5 characters",
+                "15 characters",
+                "10 characters (5 + 3 + 2)",
+                "8 characters"
+            ],
+            correct: 2,
+            exp: "The loops run 5, 3, and 2 times respectively, accumulating 5 + 3 + 2 = 10 characters."
+        },
+        {
+            topic: "TypeError with random.shuffle()",
+            q: "What error occurs if you pass a string directly to shuffle: random.shuffle('hello')?",
+            options: [
+                "IndexError",
+                "TypeError (strings does not support item assignment)",
+                "ValueError",
+                "KeyError"
+            ],
+            correct: 1,
+            exp: "Because strings do not support item assignment (immutable), random.shuffle() raises a TypeError."
+        },
+        {
+            topic: "User Input Zero",
+            q: "What happens if a user inputs 0 for no_of_symbols?",
+            options: [
+                "The program crashes with a ZeroDivisionError",
+                "The symbols loop range(0) does not execute and the password contains no symbols",
+                "One default symbol is automatically added",
+                "The password becomes empty"
+            ],
+            correct: 1,
+            exp: "range(0) produces an empty sequence, so the loop body executes 0 times, adding no symbols."
+        },
+        {
+            topic: "Module Import",
+            q: "Which keyword in Python is used to include external or standard modules like string and random?",
+            options: [
+                "include",
+                "using",
+                "import",
+                "require"
+            ],
+            correct: 2,
+            exp: "The 'import' keyword imports modules, packages, or namespaces into Python scripts."
+        },
+        {
+            topic: "Character Replacement & Duplication",
+            q: "Can the generated password contain duplicate characters (e.g., 'aa' or '99')?",
+            options: [
+                "Yes, because random.choice() samples with replacement",
+                "No, characters are removed from the pool once chosen",
+                "Only if the user requests more than 52 characters",
+                "Only punctuation symbols can be duplicated"
+            ],
+            correct: 0,
+            exp: "random.choice() selects an item independently in each iteration without removing it (sampling with replacement)."
+        },
+        {
+            topic: "Alternative: random.sample()",
+            q: "How does random.sample() differ from random.choice() in loops?",
+            options: [
+                "random.sample() selects without replacement (unique items only)",
+                "random.sample() works only on numbers",
+                "random.sample() returns a float",
+                "random.sample() always sorts the output"
+            ],
+            correct: 0,
+            exp: "random.sample(population, k) chooses k unique elements without replacement, unlike repeated random.choice()."
+        },
+        {
+            topic: "Invalid Input Handling",
+            q: "What exception occurs if the user types 'five' instead of '5' into int(input(...))?",
+            options: [
+                "SyntaxError",
+                "ValueError: invalid literal for int() with base 10",
+                "TypeError",
+                "NameError"
+            ],
+            correct: 1,
+            exp: "Passing a non-numeric string like 'five' to int() raises a ValueError."
+        }
+    ];
+
+    let userAnswers = new Array(questions.length).fill(null);
+    let currentIdx = 0;
+    let score = 0;
+
+    function loadScores() {
+        const storedHigh = localStorage.getItem('py_password_gen_highscore');
+        const high = storedHigh ? parseInt(storedHigh) : 0;
+        document.getElementById('highScore').innerText = high;
+
+        const storedFirst = localStorage.getItem('py_password_gen_first_score');
+        if (storedFirst !== null) {
+            document.getElementById('firstScore').innerText = storedFirst;
+        } else {
+            document.getElementById('firstScore').innerText = "--";
+        }
+        return { high, first: storedFirst };
+    }
+
+    function saveScores(finalScore) {
+        let isFirstTime = false;
+        if (localStorage.getItem('py_password_gen_first_score') === null) {
+            localStorage.setItem('py_password_gen_first_score', finalScore);
+            document.getElementById('firstScore').innerText = finalScore;
+            isFirstTime = true;
+        }
+
+        const currentHigh = parseInt(localStorage.getItem('py_password_gen_highscore') || '0');
+        let isNewHigh = false;
+        if (finalScore > currentHigh) {
+            localStorage.setItem('py_password_gen_highscore', finalScore);
+            document.getElementById('highScore').innerText = finalScore;
+            isNewHigh = true;
+        }
+
+        return { isFirstTime, isNewHigh };
+    }
+
+    function calculateScore() {
+        let s = 0;
+        for (let i = 0; i < questions.length; i++) {
+            if (userAnswers[i] !== null && userAnswers[i] === questions[i].correct) {
+                s++;
+            }
+        }
+        score = s;
+        document.getElementById('score').innerText = score;
+        return score;
+    }
+
+    function displayQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('qCurrent').innerText = currentIdx + 1;
+        document.getElementById('topicBadge').innerText = q.topic;
+        document.getElementById('questionText').innerText = (currentIdx + 1) + ". " + q.q;
+
+        const answeredCount = userAnswers.filter(a => a !== null).length;
+        const pct = (answeredCount / questions.length) * 100;
+        document.getElementById('progressBar').style.width = pct + '%';
+
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+
+        const expBox = document.getElementById('explanationText');
+        const statusIndicator = document.getElementById('qStatusIndicator');
+
+        const prevAns = userAnswers[currentIdx];
+
+        if (prevAns === null) {
+            statusIndicator.innerText = "Not answered";
+            statusIndicator.style.color = "var(--text-muted)";
+            expBox.style.display = 'none';
+        } else {
+            statusIndicator.innerText = prevAns === q.correct ? "✅ Correct Answer Recorded" : "❌ Incorrect Answer Recorded";
+            statusIndicator.style.color = prevAns === q.correct ? "var(--success)" : "var(--danger)";
+            showExplanation(prevAns === q.correct, prevAns);
+        }
+
+        const letters = ['A', 'B', 'C', 'D'];
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerHTML = `<span style="opacity: 0.6; min-width: 22px;">${letters[idx]})</span> <span>${opt}</span>`;
+
+            if (prevAns !== null) {
+                btn.disabled = true;
+                if (idx === q.correct) {
+                    btn.classList.add('correct');
+                } else if (idx === prevAns) {
+                    btn.classList.add('wrong');
+                }
+            } else {
+                btn.onclick = () => selectAnswer(idx);
+            }
+            container.appendChild(btn);
+        });
+
+        document.getElementById('prevBtn').disabled = (currentIdx === 0);
+        document.getElementById('nextBtn').innerText = (currentIdx === questions.length - 1) ? "Finish Quiz 🏁" : "Next ➡️";
+    }
+
+    function selectAnswer(chosenIdx) {
+        if (userAnswers[currentIdx] !== null) return;
+
+        userAnswers[currentIdx] = chosenIdx;
+        calculateScore();
+
+        const q = questions[currentIdx];
+        const isCorrect = (chosenIdx === q.correct);
+
+        const buttons = document.querySelectorAll('.opt-btn');
+        buttons.forEach(b => b.disabled = true);
+
+        if (isCorrect) {
+            buttons[chosenIdx].classList.add('correct');
+        } else {
+            buttons[chosenIdx].classList.add('wrong');
+            buttons[q.correct].classList.add('correct');
+        }
+
+        showExplanation(isCorrect, chosenIdx);
+
+        const statusIndicator = document.getElementById('qStatusIndicator');
+        statusIndicator.innerText = isCorrect ? "✅ Correct Answer Recorded" : "❌ Incorrect Answer Recorded";
+        statusIndicator.style.color = isCorrect ? "var(--success)" : "var(--danger)";
+
+        const answeredCount = userAnswers.filter(a => a !== null).length;
+        document.getElementById('progressBar').style.width = ((answeredCount / questions.length) * 100) + '%';
+    }
+
+    function showExplanation(isCorrect, chosenIdx) {
+        const q = questions[currentIdx];
+        const expBox = document.getElementById('explanationText');
+
+        if (isCorrect) {
+            expBox.innerHTML = `<b>✅ Correct!</b><br>${q.exp}`;
+            expBox.style.borderLeftColor = 'var(--success)';
+        } else {
+            expBox.innerHTML = `<b>❌ Incorrect!</b><br>Correct answer: <b>${q.options[q.correct]}</b><br>${q.exp}`;
+            expBox.style.borderLeftColor = 'var(--danger)';
+        }
+        expBox.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        if (currentIdx < questions.length - 1) {
+            currentIdx++;
+            displayQuestion();
+        } else {
+            showFinalResults();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIdx > 0) {
+            currentIdx--;
+            displayQuestion();
+        }
+    }
+
+    function openIndexModal() {
+        buildIndexGrid();
+        document.getElementById('indexModal').style.display = 'flex';
+    }
+
+    function closeIndexModal() {
+        document.getElementById('indexModal').style.display = 'none';
+    }
+
+    function closeIndexModalOnOutside(e) {
+        if (e.target.id === 'indexModal') {
+            closeIndexModal();
+        }
+    }
+
+    function buildIndexGrid() {
+        const grid = document.getElementById('gridIndexContainer');
+        grid.innerHTML = '';
+
+        for (let i = 0; i < questions.length; i++) {
+            const pill = document.createElement('div');
+            pill.className = 'index-pill';
+            pill.innerText = (i + 1);
+
+            if (i === currentIdx) {
+                pill.classList.add('active');
+            }
+
+            if (userAnswers[i] !== null) {
+                if (userAnswers[i] === questions[i].correct) {
+                    pill.classList.add('solved-correct');
+                } else {
+                    pill.classList.add('solved-wrong');
+                }
+            }
+
+            pill.onclick = () => {
+                currentIdx = i;
+                displayQuestion();
+                closeIndexModal();
+            };
+
+            grid.appendChild(pill);
+        }
+    }
+
+    function showFinalResults() {
+        document.getElementById('quizCard').style.display = 'none';
+        document.getElementById('progressBar').style.width = '100%';
+
+        const resultsCard = document.getElementById('resultsCard');
+        resultsCard.style.display = 'block';
+
+        calculateScore();
+        document.getElementById('finalScore').innerText = score;
+        const res = saveScores(score);
+        const scores = loadScores();
+
+        const notice = document.getElementById('highScoreNotice');
+        const msg = document.getElementById('resultMsg');
+        const icon = document.getElementById('trophyIcon');
+
+        let textDetails = `🎯 First Attempt Score: ${scores.first} / 20<br>`;
+        if (res.isNewHigh && score > 0) {
+            textDetails += `🏆 New Record! High Score: ${score} / 20!`;
+        } else {
+            textDetails += `🏆 High Score on this device: ${scores.high} / 20`;
+        }
+        notice.innerHTML = textDetails;
+
+        if (score >= 18) {
+            msg.innerText = "Outstanding Mastery! Excellent Python Skills 🌟";
+            icon.innerText = "👑";
+        } else if (score >= 14) {
+            msg.innerText = "Very Good Job! Solid Understanding of Random & Strings 👏";
+            icon.innerText = "🎉";
+        } else if (score >= 10) {
+            msg.innerText = "Fair Effort! Review In-place Mutation and Shuffle Operations 📖";
+            icon.innerText = "👍";
+        } else {
+            msg.innerText = "Practice Recommended! Re-run and Debug the Code Snippets ⚠️";
+            icon.innerText = "💡";
+        }
+    }
+
+    function restartQuiz() {
+        userAnswers = new Array(questions.length).fill(null);
+        currentIdx = 0;
+        score = 0;
+        document.getElementById('score').innerText = '0';
+        document.getElementById('resultsCard').style.display = 'none';
+        document.getElementById('quizCard').style.display = 'block';
+        displayQuestion();
+    }
+
+    window.onload = function() {
+        loadScores();
+        displayQuestion();
+    };
+</script>
+</body>
+</html>
