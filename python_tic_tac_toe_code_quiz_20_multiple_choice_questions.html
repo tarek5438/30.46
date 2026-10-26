@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Tic-Tac-Toe Code Quiz — 20 Multiple Choice Questions</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .question-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-xl shadow-inner">
+          🐍
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white tracking-tight">Python Tic-Tac-Toe Code Quiz</h1>
+          <p class="text-xs text-slate-400">20 Multiple-Choice Questions • 2D Lists, Loops &amp; String Indexing</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap no-print">
+        <div class="flex items-center gap-2 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs sm:text-sm">
+          <span class="text-slate-400">Answered:</span>
+          <span id="answeredCount" class="font-semibold text-indigo-400">0 / 20</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-400">Score:</span>
+          <span id="liveScore" class="font-semibold text-emerald-400">0</span>
+        </div>
+
+        <button id="toggleCodeBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Hide Code
+        </button>
+
+        <button id="revealAllBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-sm">
+          Show Answer Key
+        </button>
+
+        <button id="resetQuizBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition">
+          Reset
+        </button>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div class="w-full bg-slate-900 h-1 no-print">
+      <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-1 transition-all duration-300" style="width: 0%"></div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+
+    <!-- Reference Python Code Panel -->
+    <section id="codePanel" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div class="px-4 sm:px-6 py-3 bg-slate-800/70 border-b border-slate-700/70 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+          <span class="ml-2 text-xs sm:text-sm font-mono text-slate-300 font-medium">tic_tac_toe.py — Reference Snippet</span>
+        </div>
+        <button id="copyCodeBtn" type="button" class="no-print text-xs px-2.5 py-1 rounded-md bg-slate-700/80 hover:bg-slate-600 text-slate-200 transition">
+          Copy Code
+        </button>
+      </div>
+      <div class="p-4 sm:p-6 overflow-x-auto bg-slate-950/70">
+<pre id="rawCodeBlock" class="text-xs sm:text-sm leading-relaxed text-slate-200"><code>box = '⬜️'
+x = '❌'
+o = '⭕️'
+
+row1 = [box, box, box]
+row2 = [box, box, box]
+row3 = [box, box, box]
+
+print(f"{' '.join(row1)}\n{' '.join(row2)}\n{' '.join(row3)}")
+
+
+game = [row1, row2, row3]
+while True:
+    # player x.
+    px = input("Enter a position for x: ")
+    row_number = int(px[0])-1
+    item_number = int(px[1])-1
+
+    while game[row_number][item_number] != box:
+        px = input("Enter a new empty position for x: ")
+        row_number = int(px[0])-1
+        item_number = int(px[1])-1
+
+    game[row_number][item_number] = x
+
+    print(f"{' '.join(row1)}\n{' '.join(row2)}\n{' '.join(row3)}")
+    # winning of player x.
+    if row1[0] == x and row1[1] == x and row1[2] == x:
+        print('player x is the winner')
+        break
+
+    # player o.
+    po = input("Enter a position for o: ")
+    row_number = int(po[0])-1
+    item_number = int(po[1])-1
+
+    # loop
+    while game[row_number][item_number] != box:
+        po = input("Enter a new empty position for o: ")
+        row_number = int(po[0])-1
+        item_number = int(po[1])-1
+
+    game[row_number][item_number] = o
+
+    print(f"{' '.join(row1)}\n{' '.join(row2)}\n{' '.join(row3)}")</code></pre>
+      </div>
+    </section>
+
+    <!-- Filter & Mode Bar -->
+    <section class="no-print flex flex-wrap items-center justify-between gap-3 bg-slate-900/70 border border-slate-800/90 rounded-xl px-4 py-3">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">Filter:</span>
+        <button data-filter="all" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white transition">All (20)</button>
+        <button data-filter="unanswered" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Unanswered</button>
+        <button data-filter="incorrect" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Incorrect</button>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <span>Click any option (A–D) to check your answer immediately, or click <strong>Show Answer Key</strong> above.</span>
+      </div>
+    </section>
+
+    <!-- Result Banner (Shown when all 20 answered or Answer Key toggled) -->
+    <section id="summaryBanner" class="hidden bg-gradient-to-r from-indigo-950/90 via-slate-900 to-emerald-950/90 border border-indigo-500/40 rounded-2xl p-5 shadow-lg">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 id="summaryTitle" class="text-lg font-bold text-white">Quiz Complete!</h2>
+          <p id="summarySubtitle" class="text-sm text-slate-300 mt-0.5">Here is how you performed across all 20 questions.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div id="finalPercentage" class="text-2xl font-extrabold text-emerald-400">100%</div>
+            <div id="finalFraction" class="text-xs text-slate-400">20 / 20 Correct</div>
+          </div>
+          <button id="printBtn" type="button" class="no-print px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold border border-slate-700 transition">
+            Print / Save PDF
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questions Container -->
+    <div id="questionsContainer" class="space-y-4"></div>
+
+  </main>
+
+  <footer class="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-slate-500 border-t border-slate-900">
+    Python Tic-Tac-Toe Code Comprehension Quiz • All 20 Multiple-Choice Questions in English
+  </footer>
+
+  <script>
+    const quizData = [
+      {
+        id: 1,
+        topic: "Data Types & Variables",
+        question: "What is the data type of the variables `box`, `x`, and `o` defined at the very beginning of the code?",
+        options: [
+          "Integer (`int`)",
+          "String (`str`)",
+          "List (`list`)",
+          "Boolean (`bool`)"
+        ],
+        correct: 1,
+        explanation: "Each emoji (`'⬜️'`, `'❌'`, `'⭕️'`) is enclosed in single quotes, which makes them string (`str`) literals in Python."
+      },
+      {
+        id: 2,
+        topic: "Lists & Initialization",
+        question: "Before the `while True:` loop starts, what does `row1` contain?",
+        options: [
+          "Three `'❌'` strings: `['❌', '❌', '❌']`",
+          "Three `'⬜️'` strings: `['⬜️', '⬜️', '⬜️']`",
+          "Three integers: `[1, 2, 3]`",
+          "An empty list: `[]`"
+        ],
+        correct: 1,
+        explanation: "`row1` is initialized as `[box, box, box]`, and since `box = '⬜️'`, `row1` holds three `'⬜️'` string elements."
+      },
+      {
+        id: 3,
+        topic: "String Methods",
+        question: "What is the exact output of `' '.join(row1)` when the board is first printed?",
+        options: [
+          "`'⬜️⬜️⬜️'` (without spaces)",
+          "`'⬜️ ⬜️ ⬜️'` (separated by single spaces)",
+          "`['⬜️', '⬜️', '⬜️']`",
+          "`'⬜️\\n⬜️\\n⬜️'`"
+        ],
+        correct: 1,
+        explanation: "The `' '.join(row1)` method joins the elements of `row1` into a single string with a space `' '` placed between each element."
+      },
+      {
+        id: 4,
+        topic: "Escape Sequences",
+        question: "What is the purpose of `\\n` inside `print(f\"{' '.join(row1)}\\n{' '.join(row2)}\\n{' '.join(row3)}\")`?",
+        options: [
+          "It inserts a horizontal tab between the rows.",
+          "It deletes the previous row from the screen.",
+          "It creates a newline so each row is printed on a separate line.",
+          "It converts the list elements into numbers."
+        ],
+        correct: 2,
+        explanation: "`\\n` is the newline escape character in Python, causing `row1`, `row2`, and `row3` to display stacked vertically as a 3×3 grid."
+      },
+      {
+        id: 5,
+        topic: "2D Lists (Nested Lists)",
+        question: "What type of data structure is stored in the variable `game = [row1, row2, row3]`?",
+        options: [
+          "A dictionary mapping row names to strings",
+          "A 2D list (a list of lists) with 3 rows and 3 columns",
+          "A tuple of three strings",
+          "A set of unique board positions"
+        ],
+        correct: 1,
+        explanation: "Because `row1`, `row2`, and `row3` are lists themselves, placing them inside `[row1, row2, row3]` creates a 2-dimensional nested list."
+      },
+      {
+        id: 6,
+        topic: "Control Flow",
+        question: "Why does the program use `while True:` for the main game loop?",
+        options: [
+          "To execute the game loop only once",
+          "To create an infinite loop that keeps the game running until a `break` statement is reached",
+          "To automatically stop the game after 9 turns",
+          "To prevent syntax errors when calling `input()`"
+        ],
+        correct: 1,
+        explanation: "`while True:` runs indefinitely because the condition `True` is always truthy; it only terminates when `break` is executed (or an unhandled error/interrupt occurs)."
+      },
+      {
+        id: 7,
+        topic: "User Input & Return Types",
+        question: "What data type does `input(\"Enter a position for x: \")` always return in Python?",
+        options: [
+          "`int` (Integer)",
+          "`list` (List)",
+          "`str` (String)",
+          "`tuple` (Tuple)"
+        ],
+        correct: 2,
+        explanation: "In Python 3, the built-in `input()` function always returns the user's keystrokes as a string (`str`), even if the user types digits like `12`."
+      },
+      {
+        id: 8,
+        topic: "String Indexing & Type Casting",
+        question: "If Player X enters `23` at the prompt, what will be the values of `row_number` and `item_number`?",
+        options: [
+          "`row_number = 2`, `item_number = 3`",
+          "`row_number = 1`, `item_number = 2`",
+          "`row_number = 3`, `item_number = 2`",
+          "`row_number = 0`, `item_number = 1`"
+        ],
+        correct: 1,
+        explanation: "`px[0]` is `'2'` and `px[1]` is `'3'`. Subtracting 1 from each (`int('2') - 1` and `int('3') - 1`) gives `row_number = 1` and `item_number = 2`."
+      },
+      {
+        id: 9,
+        topic: "Zero-Based Indexing",
+        question: "Why does the code subtract `1` in `row_number = int(px[0])-1` and `item_number = int(px[1])-1`?",
+        options: [
+          "Because Python lists use 0-based indexing (`0, 1, 2`), while players enter 1-based positions (`1, 2, 3`).",
+          "Because the board only has 2 rows and 2 columns.",
+          "To convert a string directly into a boolean value.",
+          "To make Player X always go after Player O."
+        ],
+        correct: 0,
+        explanation: "Humans naturally count rows and columns as 1, 2, 3, whereas Python list indices start at 0 (`0, 1, 2`). Subtracting 1 translates human coordinates to list indices."
+      },
+      {
+        id: 10,
+        topic: "2D List Indexing",
+        question: "Which input should a player type to place their symbol in the center square of the 3×3 grid?",
+        options: [
+          "`11`",
+          "`22`",
+          "`00`",
+          "`33`"
+        ],
+        correct: 1,
+        explanation: "Typing `22` sets `row_number = 1` and `item_number = 1`. In a 0-indexed 3×3 list, `game[1][1]` is the middle row and middle column (the center square)."
+      },
+      {
+        id: 11,
+        topic: "Input Validation Loop",
+        question: "What is the purpose of the inner loop `while game[row_number][item_number] != box:`?",
+        options: [
+          "To check if the player has won the game",
+          "To prevent a player from overwriting a cell that already contains `'❌'` or `'⭕️'`",
+          "To clear the entire board back to `'⬜️'`",
+          "To switch turns between Player X and Player O"
+        ],
+        correct: 1,
+        explanation: "If the chosen cell is not equal to `box` (`'⬜️'`), it is already occupied. The `while` loop repeatedly prompts the player until they pick an empty cell."
+      },
+      {
+        id: 12,
+        topic: "List References & Aliasing",
+        question: "When `game[row_number][item_number] = x` executes with `row_number = 0` and `item_number = 2`, why does `row1` also change when printed?",
+        options: [
+          "Because Python automatically copies all variables with similar names.",
+          "Because `game[0]` holds a reference to the exact same `row1` list object in memory.",
+          "Because `print()` modifies `row1` directly.",
+          "It does not change `row1`; the printed board stays empty."
+        ],
+        correct: 1,
+        explanation: "In Python, `game = [row1, row2, row3]` stores references to the original row lists rather than copies. Modifying `game[0][2]` mutates `row1[2]` directly."
+      },
+      {
+        id: 13,
+        topic: "Win Condition Logic",
+        question: "Look at the winning condition: `if row1[0] == x and row1[1] == x and row1[2] == x:`. What is the ONLY way Player X can win in this code?",
+        options: [
+          "By filling any row, column, or diagonal with `'❌'`",
+          "By filling the entire first row (`row1`) with `'❌'`",
+          "By filling the first column (`row1[0]`, `row2[0]`, `row3[0]`) with `'❌'`",
+          "By placing `'❌'` in the center square"
+        ],
+        correct: 1,
+        explanation: "The `if` statement only checks `row1[0]`, `row1[1]`, and `row1[2]`. No other rows, columns, or diagonals are checked."
+      },
+      {
+        id: 14,
+        topic: "Loop Termination",
+        question: "What happens immediately after `print('player x is the winner')` is executed?",
+        options: [
+          "Player O is asked for their next position.",
+          "The `break` statement exits the `while True:` loop and ends the program.",
+          "The board resets all cells to `'⬜️'` and restarts.",
+          "A `SyntaxError` is raised."
+        ],
+        correct: 1,
+        explanation: "The `break` statement immediately terminates the enclosing `while True:` loop, so Player O does not get another turn and the script finishes."
+      },
+      {
+        id: 15,
+        topic: "Code Limitations & Completeness",
+        question: "What happens if Player O fills an entire row with `'⭕️'` (for example, `row2 = ['⭕️', '⭕️', '⭕️']`)?",
+        options: [
+          "The program prints `'player o is the winner'` and stops.",
+          "Nothing special happens; the game continues because there is no win check written for Player O.",
+          "The program declares Player X the winner.",
+          "The program raises a `ValueError`."
+        ],
+        correct: 1,
+        explanation: "The provided code has no `if` condition checking whether Player O has won, so the loop simply continues to Player X's next turn."
+      },
+      {
+        id: 16,
+        topic: "Runtime Exceptions (`IndexError`)",
+        question: "What error will occur if a player enters `41` as their position?",
+        options: [
+          "`IndexError: list index out of range`",
+          "`ValueError: invalid literal for int()`",
+          "`KeyError: 4`",
+          "`TypeError: 'str' object is not callable`"
+        ],
+        correct: 0,
+        explanation: "Entering `41` sets `row_number = 3` (`4 - 1`). Since `game` only has indices `0`, `1`, and `2`, accessing `game[3][0]` raises an `IndexError`."
+      },
+      {
+        id: 17,
+        topic: "Runtime Exceptions (`IndexError` / `ValueError`)",
+        question: "What happens if a player presses Enter after typing only a single digit, such as `'1'`?",
+        options: [
+          "It automatically selects row 1, column 1.",
+          "It raises an `IndexError: string index out of range` on `px[1]` (or `po[1]`).",
+          "It asks the player to enter a new empty position.",
+          "It skips the player's turn safely."
+        ],
+        correct: 1,
+        explanation: "A single-character string `'1'` only has index `0`. Attempting to access `px[1]` raises an `IndexError: string index out of range`."
+      },
+      {
+        id: 18,
+        topic: "Infinite Loop Edge Case",
+        question: "Suppose all 9 squares on the board are filled without `row1` having three `'❌'`s, and the next player enters a valid coordinate like `11`. What will happen?",
+        options: [
+          "The game prints `'Draw!'` and exits.",
+          "The program gets stuck in the inner `while game[row_number][item_number] != box:` loop because no empty `box` remains.",
+          "The board automatically clears itself.",
+          "Python automatically breaks out of the outer loop."
+        ],
+        correct: 1,
+        explanation: "Because every cell is occupied (`!= box`), there is no valid empty position left on the board, trapping the user in the inner `while` prompt forever (unless they cause an exception)."
+      },
+      {
+        id: 19,
+        topic: "Negative Indexing Quirk",
+        question: "What happens in Python if Player X enters `01` as their position on an empty board?",
+        options: [
+          "It raises an `IndexError` because `0 - 1 = -1`.",
+          "`row_number` becomes `-1`, which accesses the last row (`row3`) due to Python's negative indexing, placing `'❌'` at `row3[0]`.",
+          "It places `'❌'` at `row1[0]`.",
+          "It restarts the game."
+        ],
+        correct: 1,
+        explanation: "`int('0') - 1` evaluates to `-1`. In Python, index `-1` validly refers to the last element of a list (`game[-1]`, which is `row3`), so `game[-1][0]` updates `row3[0]`!"
+      },
+      {
+        id: 20,
+        topic: "Print Output Count",
+        question: "If Player X wins on their 3rd turn (by placing `'❌'` in `11`, `12`, and `13`), how many times is the 3×3 board printed in total during the entire run?",
+        options: [
+          "3 times",
+          "5 times",
+          "6 times",
+          "7 times"
+        ],
+        correct: 2,
+        explanation: "The board is printed: (1) once before the loop starts, (2) after X's 1st move, (3) after O's 1st move, (4) after X's 2nd move, (5) after O's 2nd move, and (6) after X's 3rd winning move right before `break` — totaling 6 times."
+      }
+    ];
+
+    const state = {
+      answers: {}, // { questionId: selectedOptionIndex }
+      revealAll: false,
+      filter: 'all',
+      showCode: true
+    };
+
+    const optionLetters = ['A', 'B', 'C', 'D'];
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function formatInlineCode(text) {
+      // Convert `code` into styled <code> tags
+      const escaped = escapeHtml(text);
+      return escaped.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 border border-slate-700 text-[0.85em]">$1</code>');
+    }
+
+    function renderQuiz() {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+
+      const filteredQuestions = quizData.filter(q => {
+        const userAns = state.answers[q.id];
+        if (state.filter === 'unanswered') return userAns === undefined;
+        if (state.filter === 'incorrect') return userAns !== undefined && userAns !== q.correct;
+        return true;
+      });
+
+      if (filteredQuestions.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
+            <p class="text-slate-300 font-medium">No questions match the current filter.</p>
+            <button id="emptyResetFilterBtn" type="button" class="mt-3 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+              Show All 20 Questions
+            </button>
+          </div>
+        `;
+        const btn = document.getElementById('emptyResetFilterBtn');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            setFilter('all');
+          });
+        }
+        updateScoreboard();
+        return;
+      }
+
+      filteredQuestions.forEach(q => {
+        const userAns = state.answers[q.id];
+        const isAnswered = userAns !== undefined;
+        const showFeedback = isAnswered || state.revealAll;
+        const isCorrect = userAns === q.correct;
+
+        let badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">${escapeHtml(q.topic)}</span>`;
+        if (isAnswered) {
+          if (isCorrect) {
+            badgeHtml += `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">✓ Correct</span>`;
+          } else {
+            badgeHtml += `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">✗ Incorrect</span>`;
+          }
+        } else if (state.revealAll) {
+          badgeHtml += `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">Answer Key Shown</span>`;
+        }
+
+        const optionsHtml = q.options.map((optText, idx) => {
+          const isSelected = userAns === idx;
+          const isRightOption = q.correct === idx;
+
+          let btnClasses = "w-full text-left p-3.5 rounded-xl border transition flex items-start gap-3 ";
+          let letterClasses = "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ";
+
+          if (showFeedback) {
+            if (isRightOption) {
+              btnClasses += "bg-emerald-950/50 border-emerald-500/60 text-emerald-100";
+              letterClasses += "bg-emerald-500 text-slate-950";
+            } else if (isSelected && !isRightOption) {
+              btnClasses += "bg-rose-950/50 border-rose-500/60 text-rose-100";
+              letterClasses += "bg-rose-500 text-white";
+            } else {
+              btnClasses += "bg-slate-900/50 border-slate-800 text-slate-400 opacity-75";
+              letterClasses += "bg-slate-800 text-slate-400";
+            }
+          } else {
+            btnClasses += "bg-slate-950/60 hover:bg-slate-800/80 border-slate-800 hover:border-indigo-500/50 text-slate-200 cursor-pointer";
+            letterClasses += "bg-slate-800 text-slate-300 border border-slate-700";
+          }
+
+          return `
+            <button type="button" data-qid="${q.id}" data-opt="${idx}" class="option-btn ${btnClasses}">
+              <span class="${letterClasses}">${optionLetters[idx]}</span>
+              <span class="text-sm leading-relaxed flex-1">${formatInlineCode(optText)}</span>
+            </button>
+          `;
+        }).join('');
+
+        const explanationHtml = showFeedback ? `
+          <div class="mt-4 p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <span class="font-semibold text-indigo-400">Correct Answer (${optionLetters[q.correct]}):</span>
+            ${formatInlineCode(q.explanation)}
+          </div>
+        ` : '';
+
+        const card = document.createElement('article');
+        card.className = "question-card bg-slate-900 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-md transition";
+        card.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Question ${q.id} of 20</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              ${badgeHtml}
+            </div>
+          </div>
+          <h3 class="text-base sm:text-lg font-semibold text-white leading-snug mb-4">
+            ${formatInlineCode(q.question)}
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            ${optionsHtml}
+          </div>
+          ${explanationHtml}
+        `;
+        container.appendChild(card);
+      });
+
+      // Attach option click listeners
+      container.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qid = parseInt(btn.getAttribute('data-qid'), 10);
+          const opt = parseInt(btn.getAttribute('data-opt'), 10);
+          state.answers[qid] = opt;
+          renderQuiz();
+        });
+      });
+
+      updateScoreboard();
+    }
+
+    function updateScoreboard() {
+      const answeredIds = Object.keys(state.answers);
+      const answeredCount = answeredIds.length;
+      let correctCount = 0;
+
+      answeredIds.forEach(id => {
+        const q = quizData.find(item => item.id === parseInt(id, 10));
+        if (q && state.answers[id] === q.correct) {
+          correctCount++;
+        }
+      });
+
+      document.getElementById('answeredCount').textContent = `${answeredCount} / ${quizData.length}`;
+      document.getElementById('liveScore').textContent = `${correctCount}`;
+
+      const pct = Math.round((answeredCount / quizData.length) * 100);
+      document.getElementById('progressBar').style.width = `${pct}%`;
+
+      const summaryBanner = document.getElementById('summaryBanner');
+      if (answeredCount === quizData.length || state.revealAll) {
+        summaryBanner.classList.remove('hidden');
+        const scorePct = Math.round((correctCount / quizData.length) * 100);
+        document.getElementById('finalPercentage').textContent = `${scorePct}%`;
+        document.getElementById('finalFraction').textContent = `${correctCount} / ${quizData.length} Correct`;
+
+        if (answeredCount === quizData.length) {
+          document.getElementById('summaryTitle').textContent = "Quiz Completed!";
+          document.getElementById('summarySubtitle').textContent = `You answered all 20 questions and scored ${correctCount} out of 20 (${scorePct}%).`;
+        } else {
+          document.getElementById('summaryTitle').textContent = "Answer Key Active";
+          document.getElementById('summarySubtitle').textContent = `All correct answers and explanations are revealed below. Current answered score: ${correctCount} / ${answeredCount || 0}.`;
+        }
+      } else {
+        summaryBanner.classList.add('hidden');
+      }
+    }
+
+    function setFilter(filterValue) {
+      state.filter = filterValue;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === filterValue) {
+          btn.className = "filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white transition";
+        } else {
+          btn.className = "filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+        }
+      });
+      renderQuiz();
+    }
+
+    // Top control buttons
+    document.getElementById('toggleCodeBtn').addEventListener('click', (e) => {
+      state.showCode = !state.showCode;
+      const panel = document.getElementById('codePanel');
+      panel.classList.toggle('hidden', !state.showCode);
+      e.currentTarget.textContent = state.showCode ? 'Hide Code' : 'Show Code';
+    });
+
+    document.getElementById('revealAllBtn').addEventListener('click', (e) => {
+      state.revealAll = !state.revealAll;
+      e.currentTarget.textContent = state.revealAll ? 'Hide Answer Key' : 'Show Answer Key';
+      renderQuiz();
+    });
+
+    document.getElementById('resetQuizBtn').addEventListener('click', () => {
+      state.answers = {};
+      state.revealAll = false;
+      document.getElementById('revealAllBtn').textContent = 'Show Answer Key';
+      setFilter('all');
+    });
+
+    document.getElementById('copyCodeBtn').addEventListener('click', (e) => {
+      const codeText = document.getElementById('rawCodeBlock').innerText;
+      const btn = e.currentTarget;
+      const fallbackCopy = () => {
+        const ta = document.createElement('textarea');
+        ta.value = codeText;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (err) {}
+        document.body.removeChild(ta);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(codeText).catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy Code'; }, 1500);
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => {
+      window.print();
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setFilter(btn.getAttribute('data-filter'));
+      });
+    });
+
+    // Initial render
+    renderQuiz();
+  </script>
+</body>
+</html>
