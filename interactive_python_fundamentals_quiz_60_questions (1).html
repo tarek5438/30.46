@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Python Fundamentals Quiz (60 Questions)</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.6);
+            border-radius: 8px;
+        }
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        .index-btn {
+            transition: all 0.15s ease;
+        }
+        .index-btn:hover {
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-500 selection:text-white pb-12">
+
+    <!-- Top Navigation / Header -->
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <!-- Brand & Title -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center shadow-md shadow-indigo-500/20 font-bold text-slate-950 text-xl code-font">
+                        Py
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                            Python Interactive Mastery Quiz
+                            <span class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                60 Questions
+                            </span>
+                        </h1>
+                        <p class="text-xs text-slate-400 flex items-center gap-1.5">
+                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="save-status-text">Auto-saving progress locally</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Live Stats & Reset Action -->
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <div class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-400">Done:</span>
+                        <span id="stat-completed" class="font-bold text-white">0/60</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-700/50 rounded-xl px-3 py-1.5 text-xs sm:text-sm">
+                        <span class="text-emerald-400">Correct:</span>
+                        <span id="stat-correct" class="font-bold text-emerald-300">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-rose-950/60 border border-rose-700/50 rounded-xl px-3 py-1.5 text-xs sm:text-sm">
+                        <span class="text-rose-400">Wrong:</span>
+                        <span id="stat-wrong" class="font-bold text-rose-300">0</span>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1.5 bg-indigo-950/60 border border-indigo-700/50 rounded-xl px-3 py-1.5 text-xs sm:text-sm">
+                        <span class="text-indigo-300">Accuracy:</span>
+                        <span id="stat-accuracy" class="font-bold text-indigo-200">0%</span>
+                    </div>
+
+                    <!-- Mobile Index Toggle Button -->
+                    <button id="toggle-drawer-btn" type="button" class="lg:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <span>Index</span>
+                    </button>
+
+                    <!-- Reset Quiz Button -->
+                    <button id="open-reset-modal-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 transition shadow-sm" title="Reset All Progress">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Reset Quiz</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Overall Progress Bar -->
+            <div class="mt-3 w-full bg-slate-800 h-2 rounded-full overflow-hidden flex">
+                <div id="progress-bar-correct" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                <div id="progress-bar-wrong" class="bg-rose-500 h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Left / Main Column: Active Question Card (8 cols on lg) -->
+            <div class="lg:col-span-8 space-y-5">
+
+                <!-- Topic Filter Pills -->
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3 shadow-md">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Jump by Topic</span>
+                        <span id="current-topic-progress" class="text-xs text-indigo-300 font-medium"></span>
+                    </div>
+                    <div id="topic-pills-container" class="flex flex-wrap gap-1.5">
+                        <!-- Rendered dynamically by JS -->
+                    </div>
+                </div>
+
+                <!-- Active Question Card -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                    <!-- Question Card Header -->
+                    <div class="bg-slate-800/60 border-b border-slate-700/70 px-5 py-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span id="q-number-badge" class="px-3 py-1 rounded-lg bg-indigo-600 text-white font-bold text-sm shadow">
+                                Question 1 / 60
+                            </span>
+                            <span id="q-topic-badge" class="px-3 py-1 rounded-lg bg-slate-700/80 text-indigo-300 font-medium text-xs border border-slate-600">
+                                Print & Data Types
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="q-status-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300">
+                                Unanswered
+                            </span>
+                            <button id="clear-current-btn" type="button" class="hidden text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition">
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Question Body -->
+                    <div class="p-5 sm:p-7 space-y-6">
+                        <h2 id="q-text" class="text-lg sm:text-xl font-semibold text-white leading-relaxed">
+                            Loading question...
+                        </h2>
+
+                        <!-- Code Snippet Box -->
+                        <div id="q-code-wrapper" class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shadow-inner">
+                            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                                    <span class="ml-2 text-xs text-slate-400 code-font">main.py</span>
+                                </div>
+                                <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Python 3</span>
+                            </div>
+                            <pre class="p-4 sm:p-5 text-sm sm:text-base text-emerald-300 code-font overflow-x-auto leading-relaxed"><code id="q-code"></code></pre>
+                        </div>
+
+                        <!-- Options List -->
+                        <div id="q-options" class="grid grid-cols-1 gap-3">
+                            <!-- Options populated via JS -->
+                        </div>
+
+                        <!-- Instant Feedback & Explanation Box -->
+                        <div id="q-feedback" class="hidden rounded-xl p-4 sm:p-5 border transition-all">
+                            <div class="flex items-start gap-3">
+                                <div id="q-feedback-icon" class="mt-0.5 flex-shrink-0"></div>
+                                <div class="space-y-1">
+                                    <h3 id="q-feedback-title" class="font-bold text-sm sm:text-base"></h3>
+                                    <p id="q-feedback-explanation" class="text-xs sm:text-sm text-slate-200 leading-relaxed"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Card Footer Navigation -->
+                    <div class="bg-slate-800/50 border-t border-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+                        <button id="prev-btn" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 disabled:opacity-40 disabled:pointer-events-none transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            <span>Previous</span>
+                        </button>
+
+                        <div class="flex items-center gap-2">
+                            <button id="next-unanswered-btn" type="button" class="px-3.5 py-2.5 rounded-xl font-medium text-xs sm:text-sm bg-slate-800/90 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 transition" title="Jump to next unanswered question">
+                                Next Unanswered
+                            </button>
+                            <button id="next-btn" type="button" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 disabled:opacity-40 disabled:pointer-events-none transition">
+                                <span>Next</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completion Summary Banner (shown when all 60 are answered) -->
+                <div id="completion-banner" class="hidden bg-gradient-to-r from-indigo-900/80 via-slate-900 to-emerald-900/80 border border-indigo-500/40 rounded-2xl p-6 shadow-xl text-center space-y-4">
+                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 mx-auto">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-white">Congratulations! You Completed All 60 Questions!</h3>
+                    <p id="completion-summary-text" class="text-slate-300 text-sm sm:text-base max-w-xl mx-auto"></p>
+                    <div class="flex flex-wrap justify-center gap-3 pt-2">
+                        <button id="review-mistakes-btn" type="button" class="px-4 py-2.5 rounded-xl font-semibold text-sm bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition">
+                            Jump to First Mistake
+                        </button>
+                        <button id="banner-reset-btn" type="button" class="px-5 py-2.5 rounded-xl font-semibold text-sm bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition">
+                            Reset & Start Fresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcut Hint -->
+                <div class="text-center text-xs text-slate-500 hidden sm:block">
+                    Tip: Use <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">←</kbd> and <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">→</kbd> arrow keys to navigate between questions, or keys <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">1</kbd> - <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">4</kbd> to select an option.
+                </div>
+            </div>
+
+            <!-- Right Column: Question Index Navigator (4 cols on lg) -->
+            <aside id="index-sidebar" class="lg:col-span-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl lg:sticky lg:top-24">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-white">Question Index</h3>
+                        <p class="text-xs text-slate-400">Saved automatically • Click any number to jump</p>
+                    </div>
+                    <span id="sidebar-progress-pct" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        0% Done
+                    </span>
+                </div>
+
+                <!-- Filter Tabs for Index -->
+                <div class="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 mb-4 text-xs font-medium">
+                    <button type="button" data-filter="all" class="index-filter-btn py-1.5 rounded-lg bg-indigo-600 text-white transition">All (60)</button>
+                    <button type="button" data-filter="unanswered" class="index-filter-btn py-1.5 rounded-lg text-slate-400 hover:text-white transition">Todo</button>
+                    <button type="button" data-filter="correct" class="index-filter-btn py-1.5 rounded-lg text-slate-400 hover:text-white transition">Correct</button>
+                    <button type="button" data-filter="wrong" class="index-filter-btn py-1.5 rounded-lg text-slate-400 hover:text-white transition">Wrong</button>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 mb-4 pb-3 border-b border-slate-800">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-indigo-600 ring-2 ring-indigo-400 inline-block"></span>
+                        <span>Current</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-emerald-600 inline-block"></span>
+                        <span>Correct</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-rose-600 inline-block"></span>
+                        <span>Wrong</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-slate-800 border border-slate-700 inline-block"></span>
+                        <span>Not Done</span>
+                    </div>
+                </div>
+
+                <!-- 60-Question Grid -->
+                <div id="question-index-grid" class="grid grid-cols-6 sm:grid-cols-10 lg:grid-cols-6 gap-2 max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Empty Filter Message -->
+                <div id="index-empty-msg" class="hidden py-8 text-center text-xs text-slate-500">
+                    No questions match this filter right now.
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 transform transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Reset All Quiz Progress?</h3>
+                    <p class="text-xs text-slate-400">This action will clear your saved answers.</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                Are you sure you want to reset all <strong class="text-white">60 questions</strong>? Your completed questions index, selected answers, and score will be cleared so you can start fresh from Question 1.
+            </p>
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button id="cancel-reset-btn" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                    Cancel
+                </button>
+                <button id="confirm-reset-btn" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition">
+                    Yes, Reset Everything
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const QUESTIONS = [
+  {
+    "id": 1,
+    "topic": "Print & Data Types",
+    "question": "What is the exact output of the following Python code?",
+    "code": "print(\"ali\")",
+    "options": [
+      "('ali')",
+      "print",
+      "ali",
+      "\"ali\""
+    ],
+    "answer": 2,
+    "explanation": "The print() function outputs the text inside the quotes without displaying the quotation marks themselves."
+  },
+  {
+    "id": 2,
+    "topic": "Print & Data Types",
+    "question": "In Python, what is the data type name used for text values such as 'ali' or \"ahmed\"?",
+    "code": "x = 'ali'\ny = \"ahmed\"",
+    "options": [
+      "str",
+      "word",
+      "text",
+      "char"
+    ],
+    "answer": 0,
+    "explanation": "Strings in Python are represented by the 'str' data type, whether enclosed in single ('') or double (\"\") quotes."
+  },
+  {
+    "id": 3,
+    "topic": "Print & Data Types",
+    "question": "Which of the following values is an integer (int) in Python?",
+    "code": null,
+    "options": [
+      "1.5",
+      "True",
+      "-3",
+      "'2'"
+    ],
+    "answer": 2,
+    "explanation": "Whole numbers (positive, negative, or zero) without a decimal point—such as 1, 2, 0, and -3—are integers (int)."
+  },
+  {
+    "id": 4,
+    "topic": "Print & Data Types",
+    "question": "Which group contains ONLY float numbers in Python?",
+    "code": null,
+    "options": [
+      "1.5, 0, -2",
+      "1.5, 6.2, -5.2",
+      "1, 2, 3",
+      "'1.5', '6.2', '-5.2'"
+    ],
+    "answer": 1,
+    "explanation": "Floating-point numbers (float) are numbers that contain a decimal point, whether positive or negative (e.g., 1.5, 6.2, -5.2)."
+  },
+  {
+    "id": 5,
+    "topic": "Print & Data Types",
+    "question": "Which of the following is a valid boolean (bool) value in Python?",
+    "code": null,
+    "options": [
+      "TRUE",
+      "'True'",
+      "true",
+      "True"
+    ],
+    "answer": 3,
+    "explanation": "Python boolean literals are case-sensitive and must start with a capital letter: True and False (without quotes)."
+  },
+  {
+    "id": 6,
+    "topic": "Print & Data Types",
+    "question": "What is the output of the following code?",
+    "code": "x = 5.3\nprint(type(x))",
+    "options": [
+      "<class 'float'>",
+      "<class 'int'>",
+      "<class 'str'>",
+      "<class 'num'>"
+    ],
+    "answer": 0,
+    "explanation": "Since 5.3 has a decimal point, its data type is float, and type(x) returns <class 'float'>."
+  },
+  {
+    "id": 7,
+    "topic": "Print & Data Types",
+    "question": "What is the data type of the variable x in the code below?",
+    "code": "x = '1.5'\nprint(type(x))",
+    "options": [
+      "<class 'int'>",
+      "<class 'str'>",
+      "<class 'float'>",
+      "<class 'bool'>"
+    ],
+    "answer": 1,
+    "explanation": "Anything enclosed in single or double quotes is a string (str), even if the characters inside look like a number."
+  },
+  {
+    "id": 8,
+    "topic": "Print & Data Types",
+    "question": "What does the following code output?",
+    "code": "x = False\nprint(type(x))",
+    "options": [
+      "<class 'bool'>",
+      "<class 'int'>",
+      "<class 'float'>",
+      "<class 'str'>"
+    ],
+    "answer": 0,
+    "explanation": "False (with a capital F and no quotes) is a boolean value, which has the type <class 'bool'> in Python."
+  },
+  {
+    "id": 9,
+    "topic": "Print & Data Types",
+    "question": "What is the data type of the number 0 in Python?",
+    "code": "x = 0\nprint(type(x))",
+    "options": [
+      "<class 'int'>",
+      "<class 'float'>",
+      "<class 'bool'>",
+      "<class 'str'>"
+    ],
+    "answer": 0,
+    "explanation": "Zero (0) without a decimal point is a whole number, so its type is <class 'int'>."
+  },
+  {
+    "id": 10,
+    "topic": "Variables",
+    "question": "What will be printed when this code runs?",
+    "code": "name = 'ali'\nprint(name)",
+    "options": [
+      "ali",
+      "name",
+      "'ali'",
+      "SyntaxError"
+    ],
+    "answer": 0,
+    "explanation": "Passing the variable name (without quotes) to print() outputs the value stored inside that variable: ali."
+  },
+  {
+    "id": 11,
+    "topic": "Variables",
+    "question": "What happens when you try to run the following code?",
+    "code": "2name = 'ali'\nprint(2name)",
+    "options": [
+      "It prints 2ali",
+      "SyntaxError",
+      "It prints 2name",
+      "It prints ali"
+    ],
+    "answer": 1,
+    "explanation": "In Python, a variable name cannot begin with a digit. Starting with '2' causes a SyntaxError."
+  },
+  {
+    "id": 12,
+    "topic": "Variables",
+    "question": "Why does the following code produce a SyntaxError?",
+    "code": "my name = 'ali'\nprint(my name)",
+    "options": [
+      "The word 'name' is a reserved keyword",
+      "Variable names must start with a capital",
+      "Single quotes are not allowed in Python",
+      "Variable names cannot contain any spaces"
+    ],
+    "answer": 3,
+    "explanation": "Spaces are not allowed inside variable names. Use an underscore instead, such as my_name."
+  },
+  {
+    "id": 13,
+    "topic": "Variables",
+    "question": "What is the output of this code?",
+    "code": "my_name = 'ali'\nprint(my_name)",
+    "options": [
+      "my_name",
+      "SyntaxError",
+      "ali",
+      "'ali'"
+    ],
+    "answer": 2,
+    "explanation": "Underscores (_) are valid in Python variable names, so my_name stores 'ali' and prints ali."
+  },
+  {
+    "id": 14,
+    "topic": "Variables",
+    "question": "What is the result of running the following code?",
+    "code": "name$ = 'ali'\nprint(name$)",
+    "options": [
+      "It prints ali",
+      "SyntaxError",
+      "It prints name$",
+      "It prints ali$"
+    ],
+    "answer": 1,
+    "explanation": "Variable names can only contain letters, digits (not at the start), and underscores (_). Symbols like $ cause a SyntaxError."
+  },
+  {
+    "id": 15,
+    "topic": "Variables",
+    "question": "What happens when you run this code in Python?",
+    "code": "print = 'ali'\nprint(print)",
+    "options": [
+      "It raises a TypeError",
+      "It prints the word ali",
+      "It raises a NameError",
+      "It prints the word print"
+    ],
+    "answer": 0,
+    "explanation": "Assigning print = 'ali' overwrites the built-in print() function with a string. Calling print(...) then tries to call the string 'ali' like a function, raising a TypeError."
+  },
+  {
+    "id": 16,
+    "topic": "Variables",
+    "question": "Which of the following is a VALID variable name in Python?",
+    "code": null,
+    "options": [
+      "first-name",
+      "1st_name",
+      "first name",
+      "first_name_1"
+    ],
+    "answer": 3,
+    "explanation": "first_name_1 starts with a letter and uses only letters, underscores, and digits. Hyphens, spaces, and leading digits are invalid."
+  },
+  {
+    "id": 17,
+    "topic": "Strings & f-strings",
+    "question": "What is the output of the following code?",
+    "code": "name = 'ahmed'\nprint(name[1])",
+    "options": [
+      "m",
+      "h",
+      "a",
+      "e"
+    ],
+    "answer": 1,
+    "explanation": "Python uses 0-based indexing: index 0 is 'a', and index 1 is 'h'."
+  },
+  {
+    "id": 18,
+    "topic": "Strings & f-strings",
+    "question": "What does the following string slice print?",
+    "code": "name = 'ahmed'\nprint(name[3:5])",
+    "options": [
+      "ed",
+      "ah",
+      "me",
+      "hm"
+    ],
+    "answer": 0,
+    "explanation": "In 'ahmed', index 3 is 'e' and index 4 is 'd'. Slicing [3:5] takes characters at index 3 and 4 (stopping before 5), resulting in 'ed'."
+  },
+  {
+    "id": 19,
+    "topic": "Strings & f-strings",
+    "question": "What is the output of the following code using negative indexing?",
+    "code": "name = 'ahmeddhgrhwhwe'\nprint(name[-1])",
+    "options": [
+      "e",
+      "h",
+      "w",
+      "a"
+    ],
+    "answer": 0,
+    "explanation": "Index -1 always refers to the very last character of a string, which is 'e'."
+  },
+  {
+    "id": 20,
+    "topic": "Strings & f-strings",
+    "question": "What will be printed by this negative slice?",
+    "code": "name = 'ahmeddhgrhwhwe'\nprint(name[-3:])",
+    "options": [
+      "wwe",
+      "hwe",
+      "ahm",
+      "whw"
+    ],
+    "answer": 1,
+    "explanation": "The slice [-3:] extracts from the 3rd character from the end up to the end of the string: 'hwe'."
+  },
+  {
+    "id": 21,
+    "topic": "Strings & f-strings",
+    "question": "What does the .upper() method output in this code?",
+    "code": "name = 'ahmed'\nprint(name.upper())",
+    "options": [
+      "Ahmed",
+      "AHMED",
+      "ahmed",
+      "aHMED"
+    ],
+    "answer": 1,
+    "explanation": "The .upper() string method converts all characters in the string to uppercase: AHMED."
+  },
+  {
+    "id": 22,
+    "topic": "Strings & f-strings",
+    "question": "What is the output of the following code?",
+    "code": "name = 'ahmed'\nprint(name.replace('hm', 'rrrr'))",
+    "options": [
+      "ahrrrrd",
+      "arrrred",
+      "rrrrd",
+      "ahrrrred"
+    ],
+    "answer": 1,
+    "explanation": "name.replace('hm', 'rrrr') replaces the substring 'hm' inside 'ahmed' with 'rrrr', producing 'arrrred'."
+  },
+  {
+    "id": 23,
+    "topic": "Strings & f-strings",
+    "question": "What number is printed by the following code?",
+    "code": "name = 'ahmed'\nprint(len(name))",
+    "options": [
+      "6",
+      "5",
+      "4",
+      "0"
+    ],
+    "answer": 1,
+    "explanation": "The len() function counts the total number of characters in the string 'ahmed', which is 5."
+  },
+  {
+    "id": 24,
+    "topic": "Strings & f-strings",
+    "question": "What does the .index() method output here?",
+    "code": "name = 'ahmed'\nprint(name.index('h'))",
+    "options": [
+      "2",
+      "3",
+      "0",
+      "1"
+    ],
+    "answer": 3,
+    "explanation": "name.index('h') returns the 0-based position of the first occurrence of 'h' in 'ahmed', which is 1."
+  },
+  {
+    "id": 25,
+    "topic": "Strings & f-strings",
+    "question": "What is the output of this slice?",
+    "code": "name = 'ahmed'\nprint(name[0:3])",
+    "options": [
+      "hme",
+      "ahm",
+      "ahme",
+      "med"
+    ],
+    "answer": 1,
+    "explanation": "Slicing [0:3] gets characters at indices 0, 1, and 2 ('a', 'h', 'm') and stops before index 3."
+  },
+  {
+    "id": 26,
+    "topic": "Strings & f-strings",
+    "question": "What happens if you search for a character that is NOT in the string using .index()?",
+    "code": "name = 'ahmed'\nprint(name.index('z'))",
+    "options": [
+      "ValueError",
+      "It outputs False",
+      "It outputs None",
+      "It outputs -1"
+    ],
+    "answer": 0,
+    "explanation": "When a substring is not found, the .index() method raises a ValueError: substring not found."
+  },
+  {
+    "id": 27,
+    "topic": "Strings & f-strings",
+    "question": "What is the exact output of the following f-string code?",
+    "code": "name = 'ahmed'\nage = 13\nprint(f'** {name} ** {age} **')",
+    "options": [
+      "** ahmed ** 13 **",
+      "** 'ahmed' ** '13' **",
+      "f'** ahmed ** 13 **'",
+      "** {name} ** {age} **"
+    ],
+    "answer": 0,
+    "explanation": "An f-string evaluates expressions and variables inside curly braces {} and inserts their values into the string."
+  },
+  {
+    "id": 28,
+    "topic": "Strings & f-strings",
+    "question": "What will be printed by the following f-string?",
+    "code": "print(f'{5+3}')",
+    "options": [
+      "5+3",
+      "{5+3}",
+      "53",
+      "8"
+    ],
+    "answer": 3,
+    "explanation": "Expressions inside {} in an f-string are calculated first, so 5+3 evaluates to 8."
+  },
+  {
+    "id": 29,
+    "topic": "Strings & f-strings",
+    "question": "What is printed when the 'f' prefix is omitted before the string?",
+    "code": "print('{5+3}')",
+    "options": [
+      "8",
+      "{5+3}",
+      "SyntaxError",
+      "5+3"
+    ],
+    "answer": 1,
+    "explanation": "Without the 'f' prefix, '{5+3}' is treated as a normal string and prints {5+3} literally without evaluating the math."
+  },
+  {
+    "id": 30,
+    "topic": "Modules",
+    "question": "What does the following code do?",
+    "code": "import random\nx = random.randint(1, 100)\nprint(x)",
+    "options": [
+      "Prints every integer from 1 to 100 in order",
+      "Prints both numbers 1 and 100 on the screen",
+      "Prints a random float between 1.0 and 100.0",
+      "Prints a random integer from 1 to 100"
+    ],
+    "answer": 3,
+    "explanation": "random.randint(1, 100) generates and returns a single random integer N between 1 and 100 inclusive."
+  },
+  {
+    "id": 31,
+    "topic": "Modules",
+    "question": "Which line correctly completes the code below when using 'from random import randint'?",
+    "code": "from random import randint\nx = ____________\nprint(x)",
+    "options": [
+      "random.int(1, 100)",
+      "import.randint(1, 100)",
+      "random.randint(1, 100)",
+      "randint(1, 100)"
+    ],
+    "answer": 3,
+    "explanation": "When you import randint directly using 'from random import randint', you call randint(1, 100) directly without 'random.' in front."
+  },
+  {
+    "id": 32,
+    "topic": "Modules",
+    "question": "Why does the following code raise a NameError?",
+    "code": "import random\nx = randint(1, 100)\nprint(x)",
+    "options": [
+      "The random module does not have randint",
+      "The variable x must be defined as an int",
+      "It must be called as random.randint(1, 100)",
+      "The number 100 is too large for randint"
+    ],
+    "answer": 2,
+    "explanation": "When importing the whole module with 'import random', functions inside it must be accessed via the module name: random.randint(1, 100)."
+  },
+  {
+    "id": 33,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of the following list slice?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nprint(students[0:2])",
+    "options": [
+      "['omar', 'ahmed']",
+      "['ali', 'ahmed']",
+      "['ali', 'omar']",
+      "['ali', 'omar', 'ahmed']"
+    ],
+    "answer": 2,
+    "explanation": "Slicing [0:2] returns a new list containing elements at index 0 and index 1 (stopping before index 2): ['ali', 'omar']."
+  },
+  {
+    "id": 34,
+    "topic": "Lists & Tuples",
+    "question": "What does the following code print?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nprint(len(students))",
+    "options": [
+      "4",
+      "3",
+      "2",
+      "12"
+    ],
+    "answer": 1,
+    "explanation": "When used on a list, len() returns the number of items in the list (3 items)."
+  },
+  {
+    "id": 35,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of this code?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nprint(students.index('omar'))",
+    "options": [
+      "2",
+      "1",
+      "0",
+      "3"
+    ],
+    "answer": 1,
+    "explanation": "In the list ['ali', 'omar', 'ahmed'], 'ali' is at index 0 and 'omar' is at index 1."
+  },
+  {
+    "id": 36,
+    "topic": "Lists & Tuples",
+    "question": "What will be printed after modifying the list element?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents[1] = 'mohamed'\nprint(students)",
+    "options": [
+      "['mohamed', 'omar', 'ahmed']",
+      "['ali', 'omar', 'mohamed']",
+      "['ali', 'mohamed', 'omar']",
+      "['ali', 'mohamed', 'ahmed']"
+    ],
+    "answer": 3,
+    "explanation": "Lists are mutable. Assigning students[1] = 'mohamed' replaces the item at index 1 ('omar') with 'mohamed'."
+  },
+  {
+    "id": 37,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of the following code using .append()?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.append('mohamed')\nprint(students)",
+    "options": [
+      "['ali', 'omar', 'mohamed', 'ahmed']",
+      "['ali', 'mohamed', 'omar', 'ahmed']",
+      "['ali', 'omar', 'ahmed', 'mohamed']",
+      "['mohamed', 'ali', 'omar', 'ahmed']"
+    ],
+    "answer": 2,
+    "explanation": "The .append() method always adds the new element to the very end of the list."
+  },
+  {
+    "id": 38,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of the following code using .insert()?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.insert(1, 'mohamed')\nprint(students)",
+    "options": [
+      "['ali', 'omar', 'ahmed', 'mohamed']",
+      "['ali', 'omar', 'mohamed', 'ahmed']",
+      "['mohamed', 'ali', 'omar', 'ahmed']",
+      "['ali', 'mohamed', 'omar', 'ahmed']"
+    ],
+    "answer": 3,
+    "explanation": "students.insert(1, 'mohamed') inserts 'mohamed' at index 1 and shifts 'omar' and 'ahmed' to the right."
+  },
+  {
+    "id": 39,
+    "topic": "Lists & Tuples",
+    "question": "What does the following code print?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.remove('omar')\nprint(students)",
+    "options": [
+      "['ahmed', 'ali']",
+      "['ali', 'omar']",
+      "['ali', 'ahmed']",
+      "['omar', 'ahmed']"
+    ],
+    "answer": 2,
+    "explanation": "The .remove('omar') method deletes the specified value ('omar') from the list, leaving ['ali', 'ahmed']."
+  },
+  {
+    "id": 40,
+    "topic": "Lists & Tuples",
+    "question": "What is printed by the following code using .pop() without arguments?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nx = students.pop()\nprint(x)",
+    "options": [
+      "None",
+      "ali",
+      "omar",
+      "ahmed"
+    ],
+    "answer": 3,
+    "explanation": "Calling .pop() with no arguments removes and returns the last item in the list, so x stores 'ahmed'."
+  },
+  {
+    "id": 41,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of this code?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.pop(1)\nprint(students)",
+    "options": [
+      "['ali', 'omar']",
+      "['ahmed', 'omar']",
+      "['omar', 'ahmed']",
+      "['ali', 'ahmed']"
+    ],
+    "answer": 3,
+    "explanation": "students.pop(1) removes the item at index 1 ('omar'). Printing the list afterwards displays the remaining items: ['ali', 'ahmed']."
+  },
+  {
+    "id": 42,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of the following code using .sort()?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.sort()\nprint(students)",
+    "options": [
+      "['ali', 'omar', 'ahmed']",
+      "['ahmed', 'omar', 'ali']",
+      "['omar', 'ali', 'ahmed']",
+      "['ahmed', 'ali', 'omar']"
+    ],
+    "answer": 3,
+    "explanation": "The .sort() method sorts a list of strings in alphabetical order (A to Z): 'ahmed', then 'ali', then 'omar'."
+  },
+  {
+    "id": 43,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of students.sort(reverse=1)?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.sort(reverse=1)\nprint(students)",
+    "options": [
+      "['ali', 'ahmed', 'omar']",
+      "['ahmed', 'ali', 'omar']",
+      "['omar', 'ali', 'ahmed']",
+      "['ahmed', 'omar', 'ali']"
+    ],
+    "answer": 2,
+    "explanation": "In Python, 1 acts as True. Passing reverse=1 sorts the list in descending (reverse alphabetical) order: ['omar', 'ali', 'ahmed']."
+  },
+  {
+    "id": 44,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of the following code using .reverse()?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nstudents.reverse()\nprint(students)",
+    "options": [
+      "['ahmed', 'omar', 'ali']",
+      "['ahmed', 'ali', 'omar']",
+      "['omar', 'ali', 'ahmed']",
+      "['ali', 'omar', 'ahmed']"
+    ],
+    "answer": 0,
+    "explanation": "Unlike .sort(), .reverse() simply flips the current order of elements from back to front without sorting alphabetically."
+  },
+  {
+    "id": 45,
+    "topic": "Lists & Tuples",
+    "question": "What does the .count() method print in this code?",
+    "code": "students = ['ali', 'omar', 'ahmed']\nprint(students.count('clara'))",
+    "options": [
+      "-1",
+      "0",
+      "None",
+      "1"
+    ],
+    "answer": 1,
+    "explanation": "The .count() method returns how many times an item appears in the list. Since 'clara' is not in the list, it returns 0."
+  },
+  {
+    "id": 46,
+    "topic": "Lists & Tuples",
+    "question": "What is the output of the following code (or using students1 += students2)?",
+    "code": "students1 = ['ali', 'omar']\nstudents2 = ['ramez', 'clara']\nstudents1.extend(students2)\nprint(students1)",
+    "options": [
+      "['ali', 'omar', 'ramez', 'clara']",
+      "['ramez', 'clara', 'ali', 'omar']",
+      "['ali', 'omar', ['ramez', 'clara']]",
+      "['ali', 'ramez', 'omar', 'clara']"
+    ],
+    "answer": 0,
+    "explanation": "Both students1.extend(students2) and students1 += students2 add each individual item from students2 to the end of students1."
+  },
+  {
+    "id": 47,
+    "topic": "Lists & Tuples",
+    "question": "What happens when you try to modify an element inside a Tuple?",
+    "code": "students = ('clara', 'omar', 'ahmed')\nstudents[1] = 'clara'\nprint(students[2])",
+    "options": [
+      "It prints clara",
+      "TypeError",
+      "It prints ahmed",
+      "It prints omar"
+    ],
+    "answer": 1,
+    "explanation": "Tuples are defined with parentheses () and are immutable (cannot be changed after creation). Trying to change students[1] raises a TypeError."
+  },
+  {
+    "id": 48,
+    "topic": "Conditionals & Operators",
+    "question": "What is the output of the following code when reading an item from a tuple?",
+    "code": "students = ('clara', 'omar', 'ahmed')\nprint(students[2])",
+    "options": [
+      "ahmed",
+      "omar",
+      "TypeError",
+      "clara"
+    ],
+    "answer": 0,
+    "explanation": "You can access tuple items by index just like lists! Index 0 is 'clara', 1 is 'omar', and 2 is 'ahmed'."
+  },
+  {
+    "id": 49,
+    "topic": "Conditionals & Operators",
+    "question": "What is the output of the following if statement?",
+    "code": "x = 5\nif x == 3:\n    print('Yes')",
+    "options": [
+      "It prints Yes",
+      "It prints no",
+      "Nothing prints",
+      "It prints False"
+    ],
+    "answer": 2,
+    "explanation": "Since x is 5, the condition x == 3 is False, and there is no else block, so nothing is printed."
+  },
+  {
+    "id": 50,
+    "topic": "Conditionals & Operators",
+    "question": "What happens if the print statement inside an if block is NOT indented?",
+    "code": "x = 5\nif x == 3:\nprint('Yes')",
+    "options": [
+      "It prints Yes",
+      "Nothing prints",
+      "IndentationError",
+      "It prints False"
+    ],
+    "answer": 2,
+    "explanation": "Python requires indentation (spaces/tabs) for the code block inside an if statement. Missing indentation raises an IndentationError."
+  },
+  {
+    "id": 51,
+    "topic": "Conditionals & Operators",
+    "question": "What will be printed by the following code?",
+    "code": "x = 5\nif x == 3:\n    print('Yes')\nelse:\n    print('no')",
+    "options": [
+      "False",
+      "Yes",
+      "Yes no",
+      "no"
+    ],
+    "answer": 3,
+    "explanation": "Because x is 5, the condition x == 3 is False, so Python executes the else block and prints 'no'."
+  },
+  {
+    "id": 52,
+    "topic": "Conditionals & Operators",
+    "question": "What is the output when using != or 'not' in the condition below?",
+    "code": "x = 5\nif not x == 3:\n    print('Yes')\nelse:\n    print('no')",
+    "options": [
+      "Yes",
+      "False",
+      "Error",
+      "no"
+    ],
+    "answer": 0,
+    "explanation": "Both 'x != 3' and 'not x == 3' check if x is NOT equal to 3. Since x is 5, the condition is True and prints 'Yes'."
+  },
+  {
+    "id": 53,
+    "topic": "Conditionals & Operators",
+    "question": "What happens when you run the following code?",
+    "code": "x = 7\nif x == 2:\n    print('hello')\nelif x == 3:\n    print('welcome')\nelif x == 4:\n    print('goodbye')",
+    "options": [
+      "It prints welcome",
+      "It prints goodbye",
+      "Nothing prints",
+      "It prints hello"
+    ],
+    "answer": 2,
+    "explanation": "Since x is 7, none of the if/elif conditions (2, 3, or 4) match, and there is no else block, so nothing is printed."
+  },
+  {
+    "id": 54,
+    "topic": "Conditionals & Operators",
+    "question": "What happens when you run this code that is missing the 'if' keyword?",
+    "code": "x = 7\nx == 7:\n    print('Hi')\nelif x == 7:\n    print('no')",
+    "options": [
+      "It prints Hi only",
+      "It prints Hi and no",
+      "It prints no only",
+      "SyntaxError"
+    ],
+    "answer": 3,
+    "explanation": "Writing 'x == 7:' without the 'if' keyword at the start of the condition is invalid syntax in Python and causes a SyntaxError."
+  },
+  {
+    "id": 55,
+    "topic": "Conditionals & Operators",
+    "question": "What is the output when multiple separate 'if' statements are used instead of 'elif'?",
+    "code": "x = 7\nif x == 2:\n    print('hello')\nif x == 7:\n    print('Hi')\nif x == 7:\n    print('no')",
+    "options": [
+      "It prints Hi then no",
+      "It prints hello only",
+      "It prints no only",
+      "It prints Hi only"
+    ],
+    "answer": 0,
+    "explanation": "Because separate 'if' statements are checked independently (unlike 'elif'), both 'if x == 7:' blocks are True and both 'Hi' and 'no' are printed."
+  },
+  {
+    "id": 56,
+    "topic": "Conditionals & Operators",
+    "question": "What is the output of the following code using 'and'?",
+    "code": "a = 5\nb = 9\nif a == 5 and b == 7:\n    print('yes')\nelse:\n    print('no')",
+    "options": [
+      "False",
+      "True",
+      "no",
+      "yes"
+    ],
+    "answer": 2,
+    "explanation": "The 'and' operator requires BOTH conditions to be True. Here a == 5 is True, but b == 7 is False (since b is 9), so it prints 'no'."
+  },
+  {
+    "id": 57,
+    "topic": "Conditionals & Operators",
+    "question": "What is the output of the following code using 'or'?",
+    "code": "a = 5\nb = 9\nif a == 2 or b == 7:\n    print('yes')\nelse:\n    print('no')",
+    "options": [
+      "yes",
+      "False",
+      "True",
+      "no"
+    ],
+    "answer": 3,
+    "explanation": "The 'or' operator is True if at least one condition is True. Here both a == 2 and b == 7 are False, so the else block runs and prints 'no'."
+  },
+  {
+    "id": 58,
+    "topic": "Conditionals & Operators",
+    "question": "What are the outputs of these two membership ('in') checks?",
+    "code": "name = 'omar'\nprint('am' in name)\n\nstudents = ['ali', 'omar', 'ahmed']\nprint('omar' in students)",
+    "options": [
+      "False then False",
+      "True then False",
+      "False then True",
+      "True then True"
+    ],
+    "answer": 2,
+    "explanation": "In 'omar', the letters are 'o', 'm', 'a', 'r' ('ma', not 'am'), so 'am' in name is False. In the list students, 'omar' is present, so it is True."
+  },
+  {
+    "id": 59,
+    "topic": "Conditionals & Operators",
+    "question": "What are the values of x, y, and z in the following division operations?",
+    "code": "x = 5 % 2\ny = 5 / 2\nz = 5 // 2",
+    "options": [
+      "x = 1, y = 2, z = 2.5",
+      "x = 2.5, y = 2, z = 1",
+      "x = 1, y = 2.5, z = 2",
+      "x = 0, y = 2.5, z = 2"
+    ],
+    "answer": 2,
+    "explanation": "% is the modulo (remainder) operator (5 % 2 = 1), / is regular float division (5 / 2 = 2.5), and // is floor/integer division (5 // 2 = 2)."
+  },
+  {
+    "id": 60,
+    "topic": "Conditionals & Operators",
+    "question": "What is printed by the following two code snippets?",
+    "code": "number = 8\nif number % 2 == 0:\n    print(f'{number} is even')\nelse:\n    print(f'{number} is odd')\n\na = 9\nb = 9\nif a >= b:\n    print('yes')",
+    "options": [
+      "8 is even  and  no",
+      "8 is odd  and  no",
+      "8 is even  and  yes",
+      "8 is odd  and  yes"
+    ],
+    "answer": 2,
+    "explanation": "8 % 2 is 0, so it prints '8 is even'. Then 9 >= 9 is True (since 9 is equal to 9), so it prints 'yes'."
+  }
+];
+        const STORAGE_KEY = 'python_mastery_quiz_v2_state';
+
+        // Application State
+        let state = {
+            currentIndex: 0,
+            answers: {}, // { questionId: selectedOptionIndex }
+            indexFilter: 'all' // 'all' | 'unanswered' | 'correct' | 'wrong'
+        };
+
+        // Safely load state from localStorage
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (typeof parsed.currentIndex === 'number' && parsed.currentIndex >= 0 && parsed.currentIndex < QUESTIONS.length) {
+                            state.currentIndex = parsed.currentIndex;
+                        }
+                        if (parsed.answers && typeof parsed.answers === 'object') {
+                            state.answers = parsed.answers;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not read from localStorage:', err);
+            }
+        }
+
+        // Safely save state to localStorage
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    currentIndex: state.currentIndex,
+                    answers: state.answers
+                }));
+                const statusEl = document.getElementById('save-status-text');
+                if (statusEl) {
+                    statusEl.textContent = 'Progress saved (' + Object.keys(state.answers).length + '/60 completed)';
+                }
+            } catch (err) {
+                console.warn('Could not save to localStorage:', err);
+            }
+        }
+
+        // Get unique topics in order
+        function getTopics() {
+            const topics = [];
+            QUESTIONS.forEach(q => {
+                if (!topics.includes(q.topic)) {
+                    topics.push(q.topic);
+                }
+            });
+            return topics;
+        }
+
+        // Render topic pills
+        function renderTopicPills() {
+            const container = document.getElementById('topic-pills-container');
+            const currentQ = QUESTIONS[state.currentIndex];
+            const topics = getTopics();
+            container.innerHTML = '';
+
+            topics.forEach(topic => {
+                const topicQuestions = QUESTIONS.filter(q => q.topic === topic);
+                const doneCount = topicQuestions.filter(q => state.answers[q.id] !== undefined).length;
+                const isActive = currentQ.topic === topic;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = isActive
+                    ? 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow transition flex items-center gap-1.5'
+                    : 'px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition flex items-center gap-1.5';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.textContent = topic;
+
+                const countSpan = document.createElement('span');
+                countSpan.className = isActive
+                    ? 'px-1.5 py-0.2 rounded-md bg-indigo-800/80 text-[10px] text-indigo-100'
+                    : 'px-1.5 py-0.2 rounded-md bg-slate-900 text-[10px] text-slate-400';
+                countSpan.textContent = doneCount + '/' + topicQuestions.length;
+
+                btn.appendChild(labelSpan);
+                btn.appendChild(countSpan);
+
+                btn.addEventListener('click', () => {
+                    // Jump to the first unanswered question in this topic, or the first question of this topic
+                    const firstUnanswered = topicQuestions.find(q => state.answers[q.id] === undefined);
+                    const targetQ = firstUnanswered || topicQuestions[0];
+                    const idx = QUESTIONS.findIndex(q => q.id === targetQ.id);
+                    if (idx !== -1) {
+                        goToQuestion(idx);
+                    }
+                });
+
+                container.appendChild(btn);
+            });
+
+            const currentTopicQuestions = QUESTIONS.filter(q => q.topic === currentQ.topic);
+            const currentTopicDone = currentTopicQuestions.filter(q => state.answers[q.id] !== undefined).length;
+            document.getElementById('current-topic-progress').textContent =
+                currentQ.topic + ': ' + currentTopicDone + '/' + currentTopicQuestions.length + ' completed';
+        }
+
+        // Render active question
+        function renderQuestion() {
+            const q = QUESTIONS[state.currentIndex];
+            const selectedOption = state.answers[q.id];
+            const isAnswered = selectedOption !== undefined;
+
+            document.getElementById('q-number-badge').textContent = 'Question ' + q.id + ' / ' + QUESTIONS.length;
+            document.getElementById('q-topic-badge').textContent = q.topic;
+            document.getElementById('q-text').textContent = q.question;
+
+            // Status Badge & Try Again button
+            const statusBadge = document.getElementById('q-status-badge');
+            const clearCurrentBtn = document.getElementById('clear-current-btn');
+
+            if (!isAnswered) {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300';
+                statusBadge.textContent = 'Not Answered Yet';
+                clearCurrentBtn.classList.add('hidden');
+            } else if (selectedOption === q.answer) {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                statusBadge.textContent = '✓ Completed (Correct)';
+                clearCurrentBtn.classList.remove('hidden');
+            } else {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+                statusBadge.textContent = '✗ Completed (Incorrect)';
+                clearCurrentBtn.classList.remove('hidden');
+            }
+
+            // Code block
+            const codeWrapper = document.getElementById('q-code-wrapper');
+            const codeEl = document.getElementById('q-code');
+            if (q.code) {
+                codeWrapper.classList.remove('hidden');
+                codeEl.textContent = q.code;
+            } else {
+                codeWrapper.classList.add('hidden');
+                codeEl.textContent = '';
+            }
+
+            // Options
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+
+                let btnClasses = 'option-btn w-full text-left p-4 rounded-xl border flex items-center justify-between gap-3 ';
+                let badgeClasses = 'w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 transition ';
+
+                if (!isAnswered) {
+                    btnClasses += 'bg-slate-800/70 hover:bg-slate-800 border-slate-700/80 hover:border-indigo-500/60 text-slate-100';
+                    badgeClasses += 'bg-slate-700 text-slate-300';
+                } else {
+                    if (idx === q.answer) {
+                        btnClasses += 'bg-emerald-950/60 border-emerald-500 text-emerald-100 shadow-md shadow-emerald-950/50';
+                        badgeClasses += 'bg-emerald-500 text-slate-950';
+                    } else if (idx === selectedOption && selectedOption !== q.answer) {
+                        btnClasses += 'bg-rose-950/60 border-rose-500 text-rose-100';
+                        badgeClasses += 'bg-rose-500 text-white';
+                    } else {
+                        btnClasses += 'bg-slate-900/50 border-slate-800 text-slate-400 opacity-65';
+                        badgeClasses += 'bg-slate-800 text-slate-500';
+                    }
+                }
+
+                btn.className = btnClasses;
+
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'flex items-center gap-3.5 min-w-0';
+
+                const letterBadge = document.createElement('span');
+                letterBadge.className = badgeClasses;
+                letterBadge.textContent = letters[idx];
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'text-sm sm:text-base font-medium break-words code-font';
+                textSpan.textContent = optText;
+
+                leftDiv.appendChild(letterBadge);
+                leftDiv.appendChild(textSpan);
+                btn.appendChild(leftDiv);
+
+                if (isAnswered) {
+                    const rightBadge = document.createElement('span');
+                    rightBadge.className = 'text-xs font-bold flex-shrink-0 px-2 py-0.5 rounded ';
+                    if (idx === q.answer) {
+                        rightBadge.className += 'bg-emerald-500/20 text-emerald-300';
+                        rightBadge.textContent = 'Correct Answer';
+                        btn.appendChild(rightBadge);
+                    } else if (idx === selectedOption) {
+                        rightBadge.className += 'bg-rose-500/20 text-rose-300';
+                        rightBadge.textContent = 'Your Choice';
+                        btn.appendChild(rightBadge);
+                    }
+                }
+
+                btn.addEventListener('click', () => selectOption(idx));
+                optionsContainer.appendChild(btn);
+            });
+
+            // Explanation Feedback
+            const feedbackBox = document.getElementById('q-feedback');
+            const feedbackIcon = document.getElementById('q-feedback-icon');
+            const feedbackTitle = document.getElementById('q-feedback-title');
+            const feedbackExp = document.getElementById('q-feedback-explanation');
+
+            if (isAnswered) {
+                feedbackBox.classList.remove('hidden');
+                const isCorrect = selectedOption === q.answer;
+                if (isCorrect) {
+                    feedbackBox.className = 'rounded-xl p-4 sm:p-5 border bg-emerald-950/40 border-emerald-500/40';
+                    feedbackTitle.className = 'font-bold text-sm sm:text-base text-emerald-300';
+                    feedbackTitle.textContent = 'Excellent! Your answer is correct.';
+                    feedbackIcon.innerHTML = '<div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">✓</div>';
+                } else {
+                    feedbackBox.className = 'rounded-xl p-4 sm:p-5 border bg-rose-950/40 border-rose-500/40';
+                    feedbackTitle.className = 'font-bold text-sm sm:text-base text-rose-300';
+                    feedbackTitle.textContent = 'Not quite! Correct Answer: ' + letters[q.answer] + ' (' + q.options[q.answer] + ')';
+                    feedbackIcon.innerHTML = '<div class="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold">!</div>';
+                }
+                feedbackExp.textContent = q.explanation;
+            } else {
+                feedbackBox.classList.add('hidden');
+            }
+
+            // Prev / Next buttons state
+            document.getElementById('prev-btn').disabled = state.currentIndex === 0;
+            document.getElementById('next-btn').disabled = state.currentIndex === QUESTIONS.length - 1;
+        }
+
+        // Render top statistics & Question Index Grid
+        function renderStatsAndIndex() {
+            let completed = 0;
+            let correct = 0;
+            let wrong = 0;
+
+            QUESTIONS.forEach(q => {
+                const ans = state.answers[q.id];
+                if (ans !== undefined) {
+                    completed++;
+                    if (ans === q.answer) {
+                        correct++;
+                    } else {
+                        wrong++;
+                    }
+                }
+            });
+
+            const total = QUESTIONS.length;
+            const accuracy = completed > 0 ? Math.round((correct / completed) * 100) : 0;
+            const pctDone = Math.round((completed / total) * 100);
+
+            document.getElementById('stat-completed').textContent = completed + '/' + total;
+            document.getElementById('stat-correct').textContent = String(correct);
+            document.getElementById('stat-wrong').textContent = String(wrong);
+            document.getElementById('stat-accuracy').textContent = accuracy + '%';
+            document.getElementById('sidebar-progress-pct').textContent = pctDone + '% Done';
+
+            document.getElementById('progress-bar-correct').style.width = ((correct / total) * 100) + '%';
+            document.getElementById('progress-bar-wrong').style.width = ((wrong / total) * 100) + '%';
+
+            // Update filter tab labels
+            const filterBtns = document.querySelectorAll('.index-filter-btn');
+            filterBtns.forEach(btn => {
+                const f = btn.getAttribute('data-filter');
+                if (f === 'all') btn.textContent = 'All (' + total + ')';
+                if (f === 'unanswered') btn.textContent = 'Todo (' + (total - completed) + ')';
+                if (f === 'correct') btn.textContent = '✓ (' + correct + ')';
+                if (f === 'wrong') btn.textContent = '✗ (' + wrong + ')';
+
+                if (f === state.indexFilter) {
+                    btn.className = 'index-filter-btn py-1.5 rounded-lg bg-indigo-600 text-white font-semibold transition';
+                } else {
+                    btn.className = 'index-filter-btn py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+                }
+            });
+
+            // Render 60-Question Index Grid
+            const grid = document.getElementById('question-index-grid');
+            const emptyMsg = document.getElementById('index-empty-msg');
+            grid.innerHTML = '';
+            let visibleCount = 0;
+
+            QUESTIONS.forEach((q, idx) => {
+                const ans = state.answers[q.id];
+                const isDone = ans !== undefined;
+                const isCorrect = isDone && ans === q.answer;
+                const isWrong = isDone && ans !== q.answer;
+                const isCurrent = idx === state.currentIndex;
+
+                // Apply filter
+                if (state.indexFilter === 'unanswered' && isDone) return;
+                if (state.indexFilter === 'correct' && !isCorrect) return;
+                if (state.indexFilter === 'wrong' && !isWrong) return;
+
+                visibleCount++;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = String(q.id);
+
+                let cls = 'index-btn h-9 rounded-lg font-bold text-xs flex items-center justify-center relative ';
+                if (isDone) {
+                    if (isCorrect) {
+                        cls += 'bg-emerald-600 text-white shadow-sm shadow-emerald-950 ';
+                    } else {
+                        cls += 'bg-rose-600 text-white shadow-sm shadow-rose-950 ';
+                    }
+                } else {
+                    cls += 'bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 ';
+                }
+
+                if (isCurrent) {
+                    cls += 'ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-900 scale-105 z-10 ';
+                    if (!isDone) {
+                        cls += 'bg-indigo-600 text-white border-indigo-400 ';
+                    }
+                }
+
+                btn.className = cls;
+                btn.title = 'Question ' + q.id + ' (' + q.topic + ') - ' + (isDone ? (isCorrect ? 'Completed: Correct' : 'Completed: Wrong') : 'Unanswered');
+                btn.addEventListener('click', () => goToQuestion(idx));
+                grid.appendChild(btn);
+            });
+
+            if (visibleCount === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                emptyMsg.classList.add('hidden');
+            }
+
+            // Completion Banner
+            const banner = document.getElementById('completion-banner');
+            const summaryText = document.getElementById('completion-summary-text');
+            const reviewMistakesBtn = document.getElementById('review-mistakes-btn');
+            if (completed === total) {
+                banner.classList.remove('hidden');
+                summaryText.textContent = 'You scored ' + correct + ' out of ' + total + ' (' + accuracy + '% accuracy). Your progress is saved!';
+                if (wrong > 0) {
+                    reviewMistakesBtn.classList.remove('hidden');
+                } else {
+                    reviewMistakesBtn.classList.add('hidden');
+                }
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        // Select an option for the current question
+        function selectOption(optionIndex) {
+            const q = QUESTIONS[state.currentIndex];
+            state.answers[q.id] = optionIndex;
+            saveState();
+            renderAll();
+        }
+
+        // Navigate to a specific question index
+        function goToQuestion(index) {
+            if (index < 0 || index >= QUESTIONS.length) return;
+            state.currentIndex = index;
+            saveState();
+            renderAll();
+        }
+
+        // Full re-render
+        function renderAll() {
+            renderTopicPills();
+            renderQuestion();
+            renderStatsAndIndex();
+        }
+
+        // Initialize Event Listeners
+        function initEvents() {
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (state.currentIndex > 0) {
+                    goToQuestion(state.currentIndex - 1);
+                }
+            });
+
+            document.getElementById('next-btn').addEventListener('click', () => {
+                if (state.currentIndex < QUESTIONS.length - 1) {
+                    goToQuestion(state.currentIndex + 1);
+                }
+            });
+
+            document.getElementById('next-unanswered-btn').addEventListener('click', () => {
+                // Search forward from currentIndex + 1, then wrap around from 0
+                for (let offset = 1; offset <= QUESTIONS.length; offset++) {
+                    const idx = (state.currentIndex + offset) % QUESTIONS.length;
+                    const q = QUESTIONS[idx];
+                    if (state.answers[q.id] === undefined) {
+                        goToQuestion(idx);
+                        return;
+                    }
+                }
+            });
+
+            document.getElementById('clear-current-btn').addEventListener('click', () => {
+                const q = QUESTIONS[state.currentIndex];
+                delete state.answers[q.id];
+                saveState();
+                renderAll();
+            });
+
+            // Filter tabs in Question Index
+            document.querySelectorAll('.index-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.indexFilter = btn.getAttribute('data-filter') || 'all';
+                    renderStatsAndIndex();
+                });
+            });
+
+            // Mobile scroll to index drawer
+            document.getElementById('toggle-drawer-btn').addEventListener('click', () => {
+                const sidebar = document.getElementById('index-sidebar');
+                if (sidebar) {
+                    sidebar.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+
+            // Review mistakes button
+            document.getElementById('review-mistakes-btn').addEventListener('click', () => {
+                const firstWrongIdx = QUESTIONS.findIndex(q => state.answers[q.id] !== undefined && state.answers[q.id] !== q.answer);
+                if (firstWrongIdx !== -1) {
+                    goToQuestion(firstWrongIdx);
+                }
+            });
+
+            // Reset Modal controls
+            const resetModal = document.getElementById('reset-modal');
+            const openResetModal = () => {
+                resetModal.classList.remove('hidden');
+                resetModal.classList.add('flex');
+            };
+            const closeResetModal = () => {
+                resetModal.classList.add('hidden');
+                resetModal.classList.remove('flex');
+            };
+
+            document.getElementById('open-reset-modal-btn').addEventListener('click', openResetModal);
+            document.getElementById('banner-reset-btn').addEventListener('click', openResetModal);
+            document.getElementById('cancel-reset-btn').addEventListener('click', closeResetModal);
+
+            resetModal.addEventListener('click', (e) => {
+                if (e.target === resetModal) closeResetModal();
+            });
+
+            document.getElementById('confirm-reset-btn').addEventListener('click', () => {
+                state.answers = {};
+                state.currentIndex = 0;
+                state.indexFilter = 'all';
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (err) {
+                    console.warn('Could not clear localStorage:', err);
+                }
+                saveState();
+                closeResetModal();
+                renderAll();
+            });
+
+            // Keyboard navigation (Left/Right arrows & 1-4 option keys)
+            window.addEventListener('keydown', (e) => {
+                if (!resetModal.classList.contains('hidden')) {
+                    if (e.key === 'Escape') closeResetModal();
+                    return;
+                }
+                if (e.key === 'ArrowRight' && state.currentIndex < QUESTIONS.length - 1) {
+                    goToQuestion(state.currentIndex + 1);
+                } else if (e.key === 'ArrowLeft' && state.currentIndex > 0) {
+                    goToQuestion(state.currentIndex - 1);
+                } else if (['1', '2', '3', '4'].includes(e.key)) {
+                    const idx = parseInt(e.key, 10) - 1;
+                    selectOption(idx);
+                }
+            });
+        }
+
+        // Start app
+        loadState();
+        initEvents();
+        renderAll();
+        saveState();
+    </script>
+</body>
+</html>
