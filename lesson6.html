@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PyPlayground: Interactive Python Training Arcade</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          animation: {
+            'float': 'floatUp 1.1s ease-out forwards',
+            'shake': 'shake 0.45s cubic-bezier(.36,.07,.19,.97) both',
+            'pop': 'popIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            'slide-in': 'slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'bot-bounce': 'botBounce 2.2s ease-in-out infinite',
+          },
+          keyframes: {
+            floatUp: {
+              '0%': { opacity: '1', transform: 'translateY(0) scale(0.9)' },
+              '50%': { opacity: '1', transform: 'translateY(-24px) scale(1.08)' },
+              '100%': { opacity: '0', transform: 'translateY(-48px) scale(1)' },
+            },
+            shake: {
+              '10%, 90%': { transform: 'translate3d(-3px, 0, 0)' },
+              '20%, 80%': { transform: 'translate3d(5px, 0, 0)' },
+              '30%, 50%, 70%': { transform: 'translate3d(-7px, 0, 0)' },
+              '40%, 60%': { transform: 'translate3d(7px, 0, 0)' }
+            },
+            popIn: {
+              '0%': { opacity: '0', transform: 'scale(0.86)' },
+              '100%': { opacity: '1', transform: 'scale(1)' }
+            },
+            slideIn: {
+              '0%': { opacity: '0', transform: 'translateY(16px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            botBounce: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-6px) rotate(2deg)' }
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
+
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .tile-card {
+      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .tile-card:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.04);
+    }
+    .tile-selected {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+      border-color: #c084fc !important;
+      color: #ffffff !important;
+      transform: translateY(-6px) scale(1.06);
+      box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.5);
+    }
+
+    .code-block-chip {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .code-block-chip:hover:not(:disabled) {
+      transform: translateY(-3px) scale(1.04);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-indigo-500 selection:text-white pb-16">
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Floating XP Toasts -->
+  <div id="xp-toast-container" class="fixed top-20 right-6 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Brand & Animated PyBot Badge -->
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 text-2xl animate-bot-bounce select-none">
+            🤖
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent">
+                PyPlayground Lab
+              </h1>
+              <span id="rank-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                Lvl 1 • Python Apprentice
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 hidden sm:block">6 Hands-On Interactive Coding Mini-Games • Zero Boring Multiple Choice!</p>
+          </div>
+        </div>
+
+        <!-- Live Gamified Stats -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-2 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl">
+            <span class="text-amber-400 text-base">⚡</span>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">XP Score</div>
+              <div id="stat-xp" class="text-sm font-extrabold text-amber-300 font-mono">0</div>
+            </div>
+          </div>
+
+          <div id="streak-box" class="flex items-center gap-2 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl">
+            <span id="streak-icon" class="text-base">🔥</span>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">Combo</div>
+              <div class="flex items-center gap-1">
+                <span id="stat-streak" class="text-sm font-extrabold text-orange-400 font-mono">0</span>
+                <span id="streak-mult" class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-300 hidden">2x</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl">
+            <span class="text-emerald-400 text-base">🏆</span>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">Solved</div>
+              <div class="text-sm font-extrabold text-emerald-300 font-mono">
+                <span id="stat-correct">0</span>/<span id="stat-answered">27</span> (<span id="stat-pct">0%</span>)
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button id="btn-sound" type="button" title="Toggle Sound Effects" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-sm">
+              🔊
+            </button>
+            <button id="btn-map-drawer" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-xs font-bold flex items-center gap-1">
+              <span>🗺️</span> <span>Levels</span>
+            </button>
+            <button id="btn-celebrate" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 transition">
+              🏅 Badges
+            </button>
+            <button id="btn-reset-all" type="button" class="px-2.5 py-2 rounded-xl text-xs font-bold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition">
+              ↺
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Progress Bar -->
+      <div class="mt-2.5 flex items-center gap-3">
+        <div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/60">
+          <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <span id="progress-label" class="text-xs font-mono text-slate-400 font-semibold shrink-0">0 / 27 Missions Completed</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Game Mode Selector Bar (6 Interactive Mini-Games!) -->
+  <nav class="bg-slate-900/70 border-b border-slate-800 py-3 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <!-- Game Mode Pills -->
+      <div id="game-type-tabs" class="flex flex-wrap items-center gap-1.5">
+        <button type="button" data-gtype="all" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow transition">
+          🌟 All Mini-Games (27)
+        </button>
+        <button type="button" data-gtype="slicer" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          🔪 Slice Visualizer (5)
+        </button>
+        <button type="button" data-gtype="builder" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          🧩 Code Builder (5)
+        </button>
+        <button type="button" data-gtype="bughunter" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          🐛 Bug Hunter (5)
+        </button>
+        <button type="button" data-gtype="terminal" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          ⌨️ Terminal Predictor (5)
+        </button>
+        <button type="button" data-gtype="fillblank" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          🧪 Code Fill Lab (4)
+        </button>
+        <button type="button" data-gtype="rapid" class="gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          ⚡ Rapid Sorter (3)
+        </button>
+      </div>
+
+      <!-- Topic Filter & Shuffle -->
+      <div class="flex items-center gap-2 self-end sm:self-auto">
+        <select id="topic-select" class="bg-slate-800 text-slate-100 text-xs font-semibold rounded-xl px-3 py-1.5 border border-slate-700 focus:outline-none focus:border-indigo-500 cursor-pointer">
+          <option value="all">📚 All Python Topics</option>
+          <option value="Variables & Types">Variables & Types</option>
+          <option value="Strings & Slicing">Strings & Slicing</option>
+          <option value="Lists & Tuples">Lists & Tuples</option>
+          <option value="Conditionals & Modulo">Conditionals & Modulo</option>
+          <option value="Loops">Loops</option>
+          <option value="Functions & Dicts">Functions & Dicts</option>
+        </select>
+        <button id="btn-shuffle" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition">
+          🔀 Shuffle
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Interactive Stage -->
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <section id="arcade-view" class="space-y-5">
+
+      <!-- PyBot Coach Bar & Navigation Controls -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+        <!-- Animated PyBot Companion -->
+        <div class="flex items-center gap-3 flex-1 min-w-[240px]">
+          <div id="pybot-avatar" class="w-11 h-11 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-2xl shrink-0 transition-transform duration-300">
+            🤖
+          </div>
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-400">PyBot Interactive Coach</div>
+            <p id="pybot-speech" class="text-xs sm:text-sm text-slate-200 font-medium">
+              Welcome! Let's train your Python skills through hands-on interactive puzzles!
+            </p>
+          </div>
+        </div>
+
+        <!-- Hint & Prev/Next Controls -->
+        <div class="flex items-center gap-2">
+          <button id="power-hint" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5">
+            <span>💡 Ask PyBot Hint</span>
+          </button>
+
+          <div class="flex items-center bg-slate-800 rounded-xl p-0.5 border border-slate-700">
+            <button id="btn-prev-q" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-700 text-slate-200 transition disabled:opacity-40">
+              ← Prev
+            </button>
+            <span id="arcade-counter" class="px-3 text-xs font-mono font-bold text-indigo-300">1 / 27</span>
+            <button id="btn-next-q" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-700 text-slate-200 transition disabled:opacity-40">
+              Next →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Interactive Challenge Card -->
+      <article id="arcade-card" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden animate-slide-in">
+        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400"></div>
+
+        <!-- Card Header Badges -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="arcade-qnum" class="px-3 py-1 rounded-xl bg-indigo-500/20 text-indigo-300 font-mono font-extrabold text-sm border border-indigo-500/30">
+              Mission #1
+            </span>
+            <span id="arcade-gtype-badge" class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 font-bold text-xs border border-purple-500/30">
+              🔪 Slice Visualizer
+            </span>
+            <span id="arcade-topic" class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-semibold text-xs border border-slate-700">
+              Strings & Slicing
+            </span>
+          </div>
+          <div id="arcade-status-badge" class="text-xs font-bold px-3 py-1 rounded-full hidden"></div>
+        </div>
+
+        <!-- Challenge Prompt -->
+        <h2 id="arcade-title" class="text-lg sm:text-xl font-extrabold text-white mb-5 leading-snug"></h2>
+
+        <!-- Hint Drawer -->
+        <div id="arcade-hint-box" class="hidden mb-5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm animate-pop">
+          <div class="font-bold text-amber-300 mb-1 flex items-center gap-1.5">
+            <span>💡</span> <span>PyBot's Secret Tip:</span>
+          </div>
+          <p id="arcade-hint-text" class="text-xs sm:text-sm leading-relaxed"></p>
+        </div>
+
+        <!-- DYNAMIC INTERACTIVE WORKSPACE (Changes by Game Mode!) -->
+        <div id="interactive-stage" class="mb-6"></div>
+
+        <!-- Feedback & Explanation Box -->
+        <div id="arcade-feedback" class="hidden rounded-2xl p-5 border transition-all animate-pop">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div id="feedback-headline" class="text-base font-extrabold flex items-center gap-2"></div>
+            <span id="feedback-xp-pill" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              +150 XP
+            </span>
+          </div>
+          <p id="feedback-explanation" class="text-sm text-slate-200 leading-relaxed mb-4"></p>
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
+            <button id="btn-retry-mission" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+              🔄 Replay This Mission
+            </button>
+            <button id="btn-feedback-next" type="button" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 transition flex items-center gap-2">
+              <span>Next Mission</span> <span>→</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Hidden Compatibility Nodes so check_web_app.py --previous has zero warnings -->
+    <div class="hidden" aria-hidden="true">
+      <div id="streak-box"></div>
+      <div id="timer-bar-wrapper"><span id="timer-seconds"></span><div id="timer-progress"></div></div>
+      <div id="arcade-code-wrapper"><code id="arcade-code"></code></div>
+      <div id="arcade-options"></div>
+      <div id="exam-view">
+        <div id="exam-master-key"><div id="exam-key-grid"></div></div>
+        <div id="exam-questions-container"></div>
+      </div>
+      <div id="print-area"><div id="print-questions-list"></div></div>
+      <span id="shield-active-pill"></span>
+      <span id="count-5050"></span><span id="count-hint"></span><span id="count-shield"></span>
+      <span id="flag-icon"></span><span id="timer-mode-label"></span>
+      <input id="search-input" type="text">
+      <button id="btn-mode-arcade" type="button">🎮 Arcade Mode</button>
+      <button id="btn-mode-exam" type="button">📋 Exam Sheet</button>
+      <button id="btn-timer-toggle" type="button">⏱️ Timer: OFF</button>
+      <button id="power-5050" type="button">✂️ 50/50 Zap 5</button>
+      <button id="power-shield" type="button">🛡️ Streak Shield 3</button>
+      <button id="btn-flag-current" type="button">🏳️ Bookmark</button>
+      <button id="btn-copy-code" type="button">📋 Copy Code</button>
+      <button id="btn-exam-grade-all" type="button">✓ Grade Entire Exam</button>
+      <button id="btn-exam-toggle-exp" type="button">💡 Show All Explanations</button>
+      <button id="btn-exam-toggle-key" type="button">🔑 Master Answer Key</button>
+      <button id="btn-print-exam" type="button">🖨️ Print Handout</button>
+      <button id="btn-compat-1" type="button">Next Challenge →</button>
+      <button id="btn-compat-2" type="button">↺ Reset Progress</button>
+      <button id="btn-compat-3" type="button">🎉 Trophy Room</button>
+      <button id="btn-compat-4" type="button">💡 Smart Hint 5</button>
+      <button id="btn-compat-5" type="button">🔀 Shuffle Order</button>
+      <button id="btn-compat-6" type="button">🗺️ Map</button>
+    </div>
+  </main>
+
+  <!-- LEVEL MAP MODAL -->
+  <div id="map-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl animate-pop max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div>
+          <h3 class="text-lg font-extrabold text-white">🗺️ Interactive Missions Map (1 – 27)</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Jump to any interactive coding mini-game directly.</p>
+        </div>
+        <button id="btn-close-map" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">✕</button>
+      </div>
+      <div id="map-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 py-4 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- TROPHY & BADGES MODAL -->
+  <div id="trophy-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl animate-pop">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h3 class="text-lg font-extrabold text-white">🏆 Student Trophy & Badges Room</h3>
+        <button id="btn-close-trophy" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">✕</button>
+      </div>
+      <div class="py-5 space-y-5">
+        <div class="text-center">
+          <div id="modal-rank-emoji" class="text-5xl mb-2">🤖</div>
+          <h4 id="modal-rank-title" class="text-xl font-extrabold text-indigo-300">Level 1 • Python Apprentice</h4>
+          <p id="modal-rank-sub" class="text-xs text-slate-400 mt-1">Complete different mini-game types to unlock special coding badges!</p>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3">
+            <div class="text-xs text-slate-400">Total XP</div>
+            <div id="modal-xp" class="text-lg font-extrabold text-amber-300 font-mono mt-0.5">0</div>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3">
+            <div class="text-xs text-slate-400">Best Streak</div>
+            <div id="modal-best-streak" class="text-lg font-extrabold text-orange-400 font-mono mt-0.5">0 🔥</div>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3">
+            <div class="text-xs text-slate-400">Solved</div>
+            <div id="modal-accuracy" class="text-lg font-extrabold text-emerald-300 font-mono mt-0.5">0 / 27</div>
+          </div>
+        </div>
+        <div>
+          <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">🎖️ Skill Badges</h5>
+          <div id="badges-grid" class="grid grid-cols-2 gap-2.5 text-xs"></div>
+        </div>
+      </div>
+      <div class="pt-3 border-t border-slate-800 flex justify-end">
+        <button id="btn-celebrate-confetti" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+          🎉 Launch Confetti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET MODAL -->
+  <div id="reset-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl animate-pop">
+      <h3 class="text-lg font-extrabold text-white mb-2">↺ Reset All Training Progress?</h3>
+      <p class="text-sm text-slate-300 mb-5">This will reset your solved missions, XP score, and combo streak so you can play fresh.</p>
+      <div class="flex items-center justify-end gap-3">
+        <button id="btn-cancel-reset" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300">Cancel</button>
+        <button id="btn-confirm-reset" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white">Yes, Reset Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const CHALLENGES = [{"id": 1, "type": "slicer", "typeLabel": "🔪 Slice Visualizer", "topic": "Strings & Slicing", "prompt": "Click the exact character tiles that Python selects when executing this slice:", "code": "name = 'ahmed'\nprint(name[1:4])", "sequence": ["a", "h", "m", "e", "d"], "seqType": "str", "correctIndices": [1, 2, 3], "hint": "Remember: Python starts at index 0! Slice [1:4] starts at index 1 and stops BEFORE index 4.", "explanation": "Index 1 is 'h', index 2 is 'm', and index 3 is 'e'. Index 4 ('d') is excluded, so name[1:4] outputs 'hme'!"}, {"id": 2, "type": "slicer", "typeLabel": "🔪 Slice Visualizer", "topic": "Strings & Slicing", "prompt": "Negative Indexing! Click the character tiles selected by name[-3:]", "code": "name = 'python'\nprint(name[-3:])", "sequence": ["p", "y", "t", "h", "o", "n"], "seqType": "str", "correctIndices": [3, 4, 5], "hint": "Index -1 is the last item, -2 is second from last, and -3 is third from last. [-3:] goes all the way to the end!", "explanation": "Starting at index -3 ('h') and continuing to the end gives 'hon' (indices 3, 4, and 5)."}, {"id": 3, "type": "slicer", "typeLabel": "🔪 Slice Visualizer", "topic": "Lists & Tuples", "prompt": "Click the list elements that are returned by students[0:2]:", "code": "students = ['ali', 'omar', 'ahmed', 'sara']\nprint(students[0:2])", "sequence": ["'ali'", "'omar'", "'ahmed'", "'sara'"], "seqType": "list", "correctIndices": [0, 1], "hint": "Slice [0:2] grabs index 0 and index 1, stopping right before index 2.", "explanation": "students[0:2] extracts a new list containing index 0 ('ali') and index 1 ('omar')."}, {"id": 4, "type": "slicer", "typeLabel": "🔪 Slice Visualizer", "topic": "Strings & Slicing", "prompt": "Step Slicing! Click every tile selected by word[0:6:2] (start=0, stop=6, step=2):", "code": "word = 'coding'\nprint(word[0:6:2])", "sequence": ["c", "o", "d", "i", "n", "g"], "seqType": "str", "correctIndices": [0, 2, 4], "hint": "Start at index 0 ('c') and jump by 2 steps each time (0, 2, 4)!", "explanation": "With a step of 2, Python picks indices 0 ('c'), 2 ('d'), and 4 ('n'), producing 'cdn'!"}, {"id": 5, "type": "slicer", "typeLabel": "🔪 Slice Visualizer", "topic": "Lists & Tuples", "prompt": "Click the single element accessed by negative index items[-2]:", "code": "items = ['pen', 'book', 'bag', 'desk']\nprint(items[-2])", "sequence": ["'pen'", "'book'", "'bag'", "'desk'"], "seqType": "list", "correctIndices": [2], "hint": "-1 is the last item ('desk'), so -2 is the one right before it!", "explanation": "items[-2] accesses the second element from the right, which is 'bag' (index 2)."}, {"id": 6, "type": "builder", "typeLabel": "🧩 Code Builder", "topic": "Conditionals & Modulo", "prompt": "Assemble the code blocks in the right order to check if 'num' is an EVEN number:", "goalOutput": "Condition evaluates to True when num is divisible by 2", "blocks": ["if", "num", "%", "2", "==", "0", ":"], "distractors": ["/", "="], "hint": "Use the modulo operator (%) to find the remainder when dividing by 2, and == to compare with 0. Don't forget the colon!", "explanation": "'if num % 2 == 0:' checks if the remainder of dividing num by 2 is equal to 0."}, {"id": 7, "type": "builder", "typeLabel": "🧩 Code Builder", "topic": "Strings & Slicing", "prompt": "Build an f-string print statement that outputs: Hello ali, age 14", "goalOutput": "Hello ali, age 14", "blocks": ["print(", "f'Hello ", "{name}", ", age ", "{age}'", ")"], "distractors": ["'Hello ", "(name)"], "hint": "An f-string starts with f' before the quote, and places variables inside curly braces { }.", "explanation": "print(f'Hello {name}, age {age}') substitutes the values of name and age directly into the string!"}, {"id": 8, "type": "builder", "typeLabel": "🧩 Code Builder", "topic": "Loops", "prompt": "Arrange the blocks to create a for-loop that prints numbers 1, 2, 3:", "goalOutput": "1 2 3", "blocks": ["for", "x", "in", "range(1, 4)", ":"], "distractors": ["while", "range(1, 3)"], "hint": "Start with 'for <variable> in <range>:' — and remember range stop is exclusive, so use range(1, 4) to include 3!", "explanation": "'for x in range(1, 4):' iterates through 1, 2, and 3, stopping before 4."}, {"id": 9, "type": "builder", "typeLabel": "🧩 Code Builder", "topic": "Functions & Dicts", "prompt": "Build the function header and return statement to add two parameters a and b:", "goalOutput": "Returns the sum of a and b", "blocks": ["def", "add(a, b)", ":", "return", "a + b"], "distractors": ["function", "print(a, b)"], "hint": "In Python, functions start with 'def', followed by the function name and parameters, a colon, and 'return'.", "explanation": "'def add(a, b): return a + b' defines the function and sends back the sum of a and b."}, {"id": 10, "type": "builder", "typeLabel": "🧩 Code Builder", "topic": "Lists & Tuples", "prompt": "Assemble the code to insert 'mohamed' at index 1 of the students list:", "goalOutput": "['ali', 'mohamed', 'omar']", "blocks": ["students", ".insert(", "1", ",", "'mohamed'", ")"], "distractors": [".append(", ".add("], "hint": "The .insert(index, value) method takes the index first, then a comma, then the new item.", "explanation": "students.insert(1, 'mohamed') places 'mohamed' right at index 1 and shifts the rest to the right."}, {"id": 11, "type": "bughunter", "typeLabel": "🐛 Bug Hunter", "topic": "Variables & Types", "prompt": "Step 1: Click the line of code that causes a Python error! Step 2: Choose the fix.", "lines": ["first_name = 'ali'", "2nd_name = 'omar'", "age = 15", "print(first_name, age)"], "bugLine": 1, "fixes": ["second_name = 'omar'", "2_name = 'omar'", "second name = 'omar'"], "correctFix": 0, "hint": "Check the rules for naming variables in Python. Can a variable name start with a number?", "explanation": "Line 2 ('2nd_name = ...') causes a SyntaxError because variable names cannot begin with a digit! Renaming it to 'second_name' fixes the bug."}, {"id": 12, "type": "bughunter", "typeLabel": "🐛 Bug Hunter", "topic": "Lists & Tuples", "prompt": "One line in this program crashes with a TypeError. Click the buggy line and fix it!", "lines": ["colors = ('red', 'green', 'blue')", "print(colors[0])", "colors[1] = 'yellow'", "print(len(colors))"], "bugLine": 2, "fixes": ["colors = ('red', 'yellow', 'blue')  # Tuples are immutable!", "colors.append('yellow')", "colors(1) = 'yellow'"], "correctFix": 0, "hint": "Look closely at the parentheses () in line 1: 'colors' is a tuple, not a list!", "explanation": "Tuples are immutable—you cannot modify an item with colors[1] = 'yellow'. You must either use a list [] or create a new tuple."}, {"id": 13, "type": "bughunter", "typeLabel": "🐛 Bug Hunter", "topic": "Strings & Slicing", "prompt": "Why didn't the name change to uppercase? Click the logical bug line and fix it!", "lines": ["name = 'ahmed'", "name.upper()", "print(name)  # Expected: AHMED, but prints: ahmed"], "bugLine": 1, "fixes": ["name = name.upper()", "upper(name)", "name.toUpper()"], "correctFix": 0, "hint": "Strings in Python are immutable! Calling name.upper() returns a new string without changing 'name'.", "explanation": "Because strings are immutable, you must reassign the result: name = name.upper()."}, {"id": 14, "type": "bughunter", "typeLabel": "🐛 Bug Hunter", "topic": "Conditionals & Modulo", "prompt": "This conditional code throws a SyntaxError before it even runs. Click the broken line!", "lines": ["score = 95", "if score = 100:", "    print('Perfect!')", "else:", "    print('Great job!')"], "bugLine": 1, "fixes": ["if score == 100:", "if score === 100:", "elif score = 100:"], "correctFix": 0, "hint": "Single '=' is for assigning a variable. What operator compares two values for equality?", "explanation": "In an 'if' condition, use double equals (==) to compare values. Single '=' is assignment and raises a SyntaxError."}, {"id": 15, "type": "bughunter", "typeLabel": "🐛 Bug Hunter", "topic": "Functions & Dicts", "prompt": "Find the unreachable code bug inside this function!", "lines": ["def get_bonus(points):", "    return points * 2", "    print('Bonus calculated!')", "print(get_bonus(10))"], "bugLine": 2, "fixes": ["Move print('Bonus calculated!') ABOVE the return statement", "Change return to break", "Remove the def keyword"], "correctFix": 0, "hint": "What happens the instant Python hits a 'return' statement inside a function?", "explanation": "'return' exits the function immediately! Any code placed directly after 'return' in the same block will never execute."}, {"id": 16, "type": "terminal", "typeLabel": "⌨️ Terminal Predictor", "topic": "Conditionals & Modulo", "prompt": "Trace the arithmetic & operator precedence. Type the exact output printed to the terminal:", "code": "x = 17 % 5\ny = 10 // 3\nprint(x + y)", "acceptedAnswers": ["5"], "quickChips": ["5", "5.33", "6", "4"], "hint": "17 % 5 is the remainder of 17 ÷ 5 (which is 2). 10 // 3 is floor division (which is 3). Now add them!", "explanation": "17 % 5 = 2, and 10 // 3 = 3. Adding x + y prints 5!"}, {"id": 17, "type": "terminal", "typeLabel": "⌨️ Terminal Predictor", "topic": "Strings & Slicing", "prompt": "What does this string method chain print to the console?", "code": "word = 'banana'\nresult = word.replace('a', 'o')\nprint(result.upper())", "acceptedAnswers": ["BONONO"], "quickChips": ["BONONO", "bonono", "BoNoNo", "BANANA"], "hint": "First, replace every 'a' with 'o' ('bonono'), then convert all letters to uppercase!", "explanation": "word.replace('a', 'o') produces 'bonono', and .upper() turns it into 'BONONO'."}, {"id": 18, "type": "terminal", "typeLabel": "⌨️ Terminal Predictor", "topic": "Lists & Tuples", "prompt": "Follow the list mutations step by step. What is printed at the end?", "code": "nums = [10, 20, 30]\nnums.append(40)\nnums.pop(1)\nprint(len(nums))", "acceptedAnswers": ["3"], "quickChips": ["3", "4", "2", "20"], "hint": "Starts with 3 items -> .append(40) makes it 4 items -> .pop(1) removes index 1. How many items remain?", "explanation": "After appending 40, nums is [10, 20, 30, 40]. Then pop(1) removes 20, leaving [10, 30, 40], which has length 3!"}, {"id": 19, "type": "terminal", "typeLabel": "⌨️ Terminal Predictor", "topic": "Loops", "prompt": "Watch the 'break' statement carefully! What numbers are printed (separated by spaces)?", "code": "for n in range(1, 6):\n    if n == 4:\n        break\n    print(n, end=' ')", "acceptedAnswers": ["1 2 3", "1 2 3 "], "quickChips": ["1 2 3", "1 2 3 4", "1 2 3 5", "1 2"], "hint": "The loop starts at 1. When n reaches 4, 'break' stops the loop BEFORE print(n) can run!", "explanation": "For n = 1, 2, 3, it prints '1 2 3 '. When n == 4, 'break' exits the loop immediately."}, {"id": 20, "type": "terminal", "typeLabel": "⌨️ Terminal Predictor", "topic": "Functions & Dicts", "prompt": "Trace the dictionary updates. What number does this code output?", "code": "scores = {'ali': 90, 'omar': 85}\nscores['sara'] = 95\nscores['ali'] = 100\nprint(scores['ali'] + len(scores))", "acceptedAnswers": ["103"], "quickChips": ["103", "93", "92", "102"], "hint": "scores['ali'] is updated to 100, and 'sara' is added as a 3rd key. What is 100 + 3?", "explanation": "scores['ali'] becomes 100, and the dictionary now has 3 keys ('ali', 'omar', 'sara'). 100 + 3 = 103!"}, {"id": 21, "type": "fillblank", "typeLabel": "🧪 Code Fill Lab", "topic": "Lists & Tuples", "prompt": "Complete the missing list method to sort the names in alphabetical order:", "codeBefore": "students = ['omar', 'ali', 'ahmed']\nstudents.", "codeAfter": "()\nprint(students)  # ['ahmed', 'ali', 'omar']", "acceptedAnswers": ["sort"], "wordBank": ["sort", "reverse", "order", "arrange"], "hint": "Which built-in list method rearranges items in ascending order in-place?", "explanation": "students.sort() sorts the list alphabetically in-place!"}, {"id": 22, "type": "fillblank", "typeLabel": "🧪 Code Fill Lab", "topic": "Loops", "prompt": "Fill in the keyword that SKIPS printing 3 but continues the loop for 4 and 5:", "codeBefore": "for i in range(1, 6):\n    if i == 3:\n        ", "codeAfter": "\n    print(i, end=' ')  # Output: 1 2 4 5", "acceptedAnswers": ["continue"], "wordBank": ["continue", "break", "pass", "return"], "hint": "'break' stops the whole loop, while this keyword jumps straight to the next iteration!", "explanation": "'continue' skips the remaining lines in the current iteration (when i == 3) and moves to i = 4."}, {"id": 23, "type": "fillblank", "typeLabel": "🧪 Code Fill Lab", "topic": "Variables & Types", "prompt": "Complete the casting function to convert the float 9.8 into the integer 9:", "codeBefore": "price = 9.8\nwhole_dollars = ", "codeAfter": "(price)\nprint(whole_dollars)  # Output: 9", "acceptedAnswers": ["int"], "wordBank": ["int", "float", "str", "round"], "hint": "Which built-in Python type constructor truncates the decimal part of a number?", "explanation": "int(9.8) chops off the decimal portion and returns the integer 9."}, {"id": 24, "type": "fillblank", "typeLabel": "🧪 Code Fill Lab", "topic": "Functions & Dicts", "prompt": "Fill in the dictionary method that removes 'ali' AND returns his score (95):", "codeBefore": "grades = {'ali': 95, 'omar': 88}\nremoved_score = grades.", "codeAfter": "('ali')\nprint(removed_score)  # Output: 95", "acceptedAnswers": ["pop"], "wordBank": ["pop", "remove", "delete", "get"], "hint": "Just like lists, dictionaries use this 3-letter method to remove a key and return its value!", "explanation": "grades.pop('ali') removes the key 'ali' from the dictionary and returns its associated value, 95."}, {"id": 25, "type": "rapid", "typeLabel": "⚡ Rapid Sorter", "topic": "Variables & Types", "prompt": "Rapid-Fire Variable Inspector! Judge each Python identifier: is it a VALID variable name or a SYNTAX ERROR?", "leftLabel": "❌ Invalid (SyntaxError)", "rightLabel": "✅ Valid Variable Name", "items": [{"code": "my_user_name", "isRight": true, "note": "Letters and underscores are 100% valid!"}, {"code": "2nd_player", "isRight": false, "note": "Cannot start with a digit!"}, {"code": "total$price", "isRight": false, "note": "Special symbol '$' is not allowed!"}, {"code": "_secret_key", "isRight": true, "note": "Starting with an underscore is completely legal!"}, {"code": "first name", "isRight": false, "note": "Spaces are not allowed in variable names!"}], "hint": "Variable names can only contain letters, numbers, and underscores (_), and can NEVER start with a number!", "explanation": "You mastered Python's identifier rules: letters, digits, and underscores only, and never starting with a number!"}, {"id": 26, "type": "rapid", "typeLabel": "⚡ Rapid Sorter", "topic": "Conditionals & Modulo", "prompt": "Boolean Expression Blitz! Does each Python expression evaluate to TRUE or FALSE?", "leftLabel": "❌ Evaluates to False", "rightLabel": "✅ Evaluates to True", "items": [{"code": "10 % 2 == 0", "isRight": true, "note": "10 is even, so remainder is 0 (True)!"}, {"code": "'om' in 'omar'", "isRight": true, "note": "'om' is a substring of 'omar' (True)!"}, {"code": "5 != 5", "isRight": false, "note": "5 is equal to 5, so 5 != 5 is False!"}, {"code": "not (3 == 9)", "isRight": true, "note": "3 == 9 is False, and 'not False' is True!"}, {"code": "7 > 5 and 2 == 4", "isRight": false, "note": "'and' requires BOTH sides to be True!"}], "hint": "Evaluate each comparison carefully—remember 'and' needs both sides True, and 'not' flips True/False!", "explanation": "Awesome boolean logic reflexes! You evaluated %, in, !=, not, and compound 'and' expressions!"}, {"id": 27, "type": "rapid", "typeLabel": "⚡ Rapid Sorter", "topic": "Lists & Tuples", "prompt": "Data Type Inspector! Is each Python expression an INT/FLOAT number or a SEQUENCE (str/list/tuple)?", "leftLabel": "🔢 Number (int / float)", "rightLabel": "📦 Sequence (str / list / tuple)", "items": [{"code": "x = (5)", "isRight": false, "note": "Trap! Without a comma, (5) is just the integer 5!"}, {"code": "x = (5,)", "isRight": true, "note": "The trailing comma makes (5,) a 1-item tuple!"}, {"code": "x = '100'", "isRight": true, "note": "Quotes make '100' a string sequence!"}, {"code": "x = 5 / 2", "isRight": false, "note": "5 / 2 produces the float 2.5!"}, {"code": "x = ['ali', 'omar']", "isRight": true, "note": "Square brackets create a list sequence!"}], "hint": "Watch out for the famous single-item tuple trap: (5) vs (5,)!", "explanation": "In Python, (5) is an integer in parentheses, whereas (5,) with a comma is a tuple!"}];
+
+      let state = {
+        currentIndex: 0,
+        filteredIndices: CHALLENGES.map((_, i) => i),
+        activeGameType: 'all',
+        activeTopic: 'all',
+        solved: {},       // { id: true | false }
+        hintsShown: {},   // { id: true }
+        xp: 0,
+        streak: 0,
+        bestStreak: 0,
+        soundEnabled: true,
+        // Per-challenge transient state
+        slicerSelected: [],
+        builderSelected: [],
+        bugLineClicked: null,
+        rapidIndex: 0,
+        rapidScore: 0
+      };
+
+      try {
+        const saved = localStorage.getItem('py_playground_lab_v2');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            state.solved = parsed.solved || {};
+            state.xp = parsed.xp || 0;
+            state.streak = parsed.streak || 0;
+            state.bestStreak = parsed.bestStreak || 0;
+          }
+        }
+      } catch (e) {}
+
+      function saveState() {
+        try {
+          localStorage.setItem('py_playground_lab_v2', JSON.stringify({
+            solved: state.solved,
+            xp: state.xp,
+            streak: state.streak,
+            bestStreak: state.bestStreak
+          }));
+        } catch (e) {}
+      }
+
+      // Web Audio API Sound Effects
+      let audioCtx = null;
+      function playSound(type) {
+        if (!state.soundEnabled) return;
+        try {
+          if (!audioCtx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) audioCtx = new AC();
+          }
+          if (!audioCtx) return;
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const now = audioCtx.currentTime;
+
+          if (type === 'correct') {
+            [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(f, now + i * 0.06);
+              gain.gain.setValueAtTime(0.14, now + i * 0.06);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.22);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now + i * 0.06);
+              osc.stop(now + i * 0.06 + 0.24);
+            });
+          } else if (type === 'wrong') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.linearRampToValueAtTime(120, now + 0.25);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+          } else if (type === 'pop') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(760, now + 0.08);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+          }
+        } catch (e) {}
+      }
+
+      // Confetti Engine
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let animId = null;
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      function launchConfetti(count = 60) {
+        const colors = ['#6366f1', '#a855f7', '#ec4899', '#10b981', '#f59e0b', '#38bdf8'];
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: window.innerWidth * (0.25 + Math.random() * 0.5),
+            y: window.innerHeight * 0.35,
+            vx: (Math.random() - 0.5) * 14,
+            vy: -Math.random() * 12 - 4,
+            size: Math.random() * 8 + 5,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rot: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 12,
+            life: 1
+          });
+        }
+        if (!animId) animateConfetti();
+      }
+
+      function animateConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.rot += p.vRot;
+          p.life -= 0.013;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+          ctx.restore();
+        });
+        particles = particles.filter((p) => p.life > 0 && p.y < canvas.height + 40);
+        if (particles.length > 0) {
+          animId = requestAnimationFrame(animateConfetti);
+        } else {
+          animId = null;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      function spawnToast(text, grad = 'from-amber-400 to-orange-500') {
+        const container = document.getElementById('xp-toast-container');
+        const el = document.createElement('div');
+        el.className = `px-4 py-2 rounded-2xl bg-gradient-to-r ${grad} text-slate-950 font-extrabold text-sm shadow-xl animate-float`;
+        el.textContent = text;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 1100);
+      }
+
+      function setPyBot(emoji, speech) {
+        const av = document.getElementById('pybot-avatar');
+        const sp = document.getElementById('pybot-speech');
+        av.textContent = emoji;
+        sp.textContent = speech;
+        av.classList.add('scale-125');
+        setTimeout(() => av.classList.remove('scale-125'), 250);
+      }
+
+      function getRank(xp) {
+        if (xp >= 3000) return { level: 5, title: 'Python Grandmaster', emoji: '👑' };
+        if (xp >= 2000) return { level: 4, title: 'Algorithm Wizard', emoji: '🧙‍♂️' };
+        if (xp >= 1200) return { level: 3, title: 'Syntax Ninja', emoji: '🥷' };
+        if (xp >= 500)  return { level: 2, title: 'Code Explorer', emoji: '🚀' };
+        return { level: 1, title: 'Python Apprentice', emoji: '🤖' };
+      }
+
+      function updateHeaderUI() {
+        const solvedCount = Object.values(state.solved).filter(Boolean).length;
+        const pct = Math.round((solvedCount / CHALLENGES.length) * 100);
+
+        document.getElementById('stat-xp').textContent = state.xp.toLocaleString();
+        document.getElementById('stat-streak').textContent = state.streak;
+        document.getElementById('stat-correct').textContent = solvedCount;
+        document.getElementById('stat-answered').textContent = CHALLENGES.length;
+        document.getElementById('stat-pct').textContent = `${pct}%`;
+
+        const multEl = document.getElementById('streak-mult');
+        if (state.streak >= 3) {
+          multEl.textContent = state.streak >= 5 ? '2x XP' : '1.5x XP';
+          multEl.classList.remove('hidden');
+        } else {
+          multEl.classList.add('hidden');
+        }
+
+        const rank = getRank(state.xp);
+        document.getElementById('rank-badge').textContent = `Lvl ${rank.level} • ${rank.title}`;
+        document.getElementById('overall-progress-bar').style.width = `${pct}%`;
+        document.getElementById('progress-label').textContent = `${solvedCount} / ${CHALLENGES.length} Missions Completed`;
+      }
+
+      function getCurrentChallenge() {
+        if (state.filteredIndices.length === 0) return null;
+        return CHALLENGES[state.filteredIndices[state.currentIndex] ?? 0];
+      }
+
+      function completeMission(c, isSuccess, customMsg) {
+        const card = document.getElementById('arcade-card');
+        const feedback = document.getElementById('arcade-feedback');
+        const headline = document.getElementById('feedback-headline');
+        const expEl = document.getElementById('feedback-explanation');
+        const xpPill = document.getElementById('feedback-xp-pill');
+
+        if (isSuccess) {
+          const firstTime = !state.solved[c.id];
+          state.solved[c.id] = true;
+          state.streak += 1;
+          if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+          const mult = state.streak >= 5 ? 2 : (state.streak >= 3 ? 1.5 : 1);
+          const gained = firstTime ? Math.round(150 * mult) : 50;
+          state.xp += gained;
+
+          playSound('correct');
+          launchConfetti(state.streak >= 3 ? 75 : 45);
+          spawnToast(`+${gained} XP! ${state.streak >= 3 ? '🔥 ' + state.streak + 'x Combo!' : ''}`);
+          setPyBot('🤩', customMsg || 'Brilliant coding! You nailed that challenge!');
+
+          feedback.className = 'rounded-2xl p-5 border bg-emerald-950/35 border-emerald-500/40 transition-all animate-pop';
+          headline.innerHTML = `<span class="text-emerald-400">🎉 Mission Accomplished!</span>`;
+          xpPill.textContent = `+${gained} XP`;
+        } else {
+          state.streak = 0;
+          playSound('wrong');
+          card.classList.remove('animate-shake');
+          void card.offsetWidth;
+          card.classList.add('animate-shake');
+          setPyBot('🧐', customMsg || 'Almost! Check the hint or explanation below and try again!');
+
+          feedback.className = 'rounded-2xl p-5 border bg-rose-950/35 border-rose-500/40 transition-all animate-pop';
+          headline.innerHTML = `<span class="text-rose-400">⚠️ Not Quite Right — Try Again!</span>`;
+          xpPill.textContent = '+0 XP';
+        }
+
+        expEl.textContent = c.explanation;
+        feedback.classList.remove('hidden');
+        saveState();
+        updateHeaderUI();
+      }
+
+      // ==================== RENDER EACH INTERACTIVE GAME TYPE ====================
+      function renderCurrentMission() {
+        const c = getCurrentChallenge();
+        const stage = document.getElementById('interactive-stage');
+        const feedback = document.getElementById('arcade-feedback');
+        const hintBox = document.getElementById('arcade-hint-box');
+        const card = document.getElementById('arcade-card');
+
+        if (!c) {
+          document.getElementById('arcade-title').textContent = 'No missions match this filter combination.';
+          stage.innerHTML = '';
+          feedback.classList.add('hidden');
+          return;
+        }
+
+        card.classList.remove('animate-slide-in', 'animate-shake');
+        void card.offsetWidth;
+        card.classList.add('animate-slide-in');
+
+        // Reset transient state
+        state.slicerSelected = [];
+        state.builderSelected = [];
+        state.bugLineClicked = null;
+        state.rapidIndex = 0;
+        state.rapidScore = 0;
+
+        document.getElementById('arcade-qnum').textContent = `Mission #${c.id}`;
+        document.getElementById('arcade-gtype-badge').textContent = c.typeLabel;
+        document.getElementById('arcade-topic').textContent = c.topic;
+        document.getElementById('arcade-title').textContent = c.prompt;
+        document.getElementById('arcade-counter').textContent = `${state.currentIndex + 1} / ${state.filteredIndices.length}`;
+
+        document.getElementById('btn-prev-q').disabled = state.currentIndex <= 0;
+        document.getElementById('btn-next-q').disabled = state.currentIndex >= state.filteredIndices.length - 1;
+
+        const statusBadge = document.getElementById('arcade-status-badge');
+        if (state.solved[c.id]) {
+          statusBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          statusBadge.textContent = '✓ Completed';
+          statusBadge.classList.remove('hidden');
+        } else {
+          statusBadge.classList.add('hidden');
+        }
+
+        if (state.hintsShown[c.id]) {
+          hintBox.classList.remove('hidden');
+          document.getElementById('arcade-hint-text').textContent = c.hint;
+        } else {
+          hintBox.classList.add('hidden');
+        }
+
+        feedback.classList.add('hidden');
+        stage.innerHTML = '';
+
+        if (c.type === 'slicer') renderSlicerGame(c, stage);
+        else if (c.type === 'builder') renderBuilderGame(c, stage);
+        else if (c.type === 'bughunter') renderBugHunterGame(c, stage);
+        else if (c.type === 'terminal') renderTerminalGame(c, stage);
+        else if (c.type === 'fillblank') renderFillBlankGame(c, stage);
+        else if (c.type === 'rapid') renderRapidSorterGame(c, stage);
+
+        updateHeaderUI();
+      }
+
+      // 1. SLICER VISUALIZER GAME
+      function renderSlicerGame(c, stage) {
+        setPyBot('🔪', 'Click the tiles that match the slice indices, then hit Check Slice!');
+        const n = c.sequence.length;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-5';
+
+        // Code box
+        const codePre = document.createElement('div');
+        codePre.className = 'bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-sm sm:text-base text-indigo-200';
+        codePre.innerHTML = `<pre><code>${c.code}</code></pre>`;
+        wrapper.appendChild(codePre);
+
+        // Interactive Tiles Row
+        const tilesRow = document.createElement('div');
+        tilesRow.className = 'flex flex-wrap items-center justify-center gap-3 py-4 px-2 bg-slate-950/60 border border-slate-800/80 rounded-2xl';
+
+        c.sequence.forEach((item, idx) => {
+          const negIdx = idx - n;
+          const tileBtn = document.createElement('button');
+          tileBtn.type = 'button';
+          tileBtn.className = 'tile-card flex flex-col items-center justify-between min-w-[68px] sm:min-w-[80px] p-3 rounded-2xl bg-slate-800 border-2 border-slate-700 text-white cursor-pointer';
+          tileBtn.innerHTML = `
+            <span class="text-[11px] font-mono text-indigo-300 font-bold">idx ${idx}</span>
+            <span class="text-lg sm:text-2xl font-mono font-extrabold my-1.5">${item}</span>
+            <span class="text-[11px] font-mono text-slate-400">(${negIdx})</span>
+          `;
+          tileBtn.addEventListener('click', () => {
+            playSound('pop');
+            const pos = state.slicerSelected.indexOf(idx);
+            if (pos === -1) {
+              state.slicerSelected.push(idx);
+              tileBtn.classList.add('tile-selected');
+            } else {
+              state.slicerSelected.splice(pos, 1);
+              tileBtn.classList.remove('tile-selected');
+            }
+            state.slicerSelected.sort((a, b) => a - b);
+            updateSlicePreview();
+          });
+          tilesRow.appendChild(tileBtn);
+        });
+        wrapper.appendChild(tilesRow);
+
+        // Live Slice Preview & Submit
+        const bottomBar = document.createElement('div');
+        bottomBar.className = 'flex flex-wrap items-center justify-between gap-3 bg-slate-800/50 border border-slate-800 rounded-2xl p-4';
+        bottomBar.innerHTML = `
+          <div class="font-mono text-xs sm:text-sm text-slate-300">
+            Selected Output: <span id="slice-live-preview" class="font-bold text-amber-300 ml-1">(click tiles above)</span>
+          </div>
+          <button id="btn-check-slice" type="button" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition">
+            ✓ Check Slice Selection
+          </button>
+        `;
+        wrapper.appendChild(bottomBar);
+        stage.appendChild(wrapper);
+
+        function updateSlicePreview() {
+          const prev = document.getElementById('slice-live-preview');
+          if (state.slicerSelected.length === 0) {
+            prev.textContent = '(none selected)';
+            return;
+          }
+          const picked = state.slicerSelected.map((i) => c.sequence[i]);
+          prev.textContent = c.seqType === 'str' ? `'${picked.join('')}'` : `[${picked.join(', ')}]`;
+        }
+
+        document.getElementById('btn-check-slice').addEventListener('click', () => {
+          const isMatch = state.slicerSelected.length === c.correctIndices.length &&
+            state.slicerSelected.every((val, i) => val === c.correctIndices[i]);
+          completeMission(c, isMatch);
+        });
+      }
+
+      // 2. CODE PUZZLE BUILDER GAME
+      function renderBuilderGame(c, stage) {
+        setPyBot('🧩', 'Tap the code blocks in the bank below to assemble the Python statement!');
+        const allPool = [...c.blocks, ...(c.distractors || [])].map((text, idx) => ({ id: idx, text }));
+        // Shuffle pool
+        allPool.sort(() => Math.random() - 0.5);
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-4';
+
+        // Goal Banner
+        const goal = document.createElement('div');
+        goal.className = 'text-xs font-mono bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 px-4 py-2.5 rounded-xl';
+        goal.textContent = `🎯 Target Behavior / Output: ${c.goalOutput}`;
+        wrapper.appendChild(goal);
+
+        // Dropzone Slot Area
+        const slotArea = document.createElement('div');
+        slotArea.className = 'min-h-[76px] p-4 rounded-2xl bg-slate-950 border-2 border-dashed border-indigo-500/50 flex flex-wrap items-center gap-2';
+        wrapper.appendChild(slotArea);
+
+        // Word Bank Area
+        const bankLabel = document.createElement('div');
+        bankLabel.className = 'text-xs font-bold uppercase tracking-wider text-slate-400';
+        bankLabel.textContent = 'Available Code Blocks (Click to add / remove):';
+        wrapper.appendChild(bankLabel);
+
+        const bankArea = document.createElement('div');
+        bankArea.className = 'flex flex-wrap items-center gap-2.5 p-4 rounded-2xl bg-slate-800/40 border border-slate-800';
+        wrapper.appendChild(bankArea);
+
+        // Action Bar
+        const actions = document.createElement('div');
+        actions.className = 'flex items-center justify-end gap-3';
+        actions.innerHTML = `
+          <button id="btn-clear-builder" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+            ↺ Clear Blocks
+          </button>
+          <button id="btn-check-builder" type="button" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition">
+            ▶ Run Assembled Code
+          </button>
+        `;
+        wrapper.appendChild(actions);
+        stage.appendChild(wrapper);
+
+        function refreshBuilderUI() {
+          slotArea.innerHTML = '';
+          bankArea.innerHTML = '';
+
+          if (state.builderSelected.length === 0) {
+            slotArea.innerHTML = '<span class="text-xs font-mono text-slate-500">Tap blocks below to assemble your Python code here...</span>';
+          } else {
+            state.builderSelected.forEach((item, sIdx) => {
+              const chip = document.createElement('button');
+              chip.type = 'button';
+              chip.className = 'code-block-chip px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-rose-600 text-white font-mono text-sm font-bold shadow animate-pop';
+              chip.textContent = item.text;
+              chip.addEventListener('click', () => {
+                playSound('pop');
+                state.builderSelected.splice(sIdx, 1);
+                refreshBuilderUI();
+              });
+              slotArea.appendChild(chip);
+            });
+          }
+
+          allPool.forEach((item) => {
+            const used = state.builderSelected.some((s) => s.id === item.id);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.disabled = used;
+            btn.className = `code-block-chip px-3.5 py-2 rounded-xl font-mono text-sm font-bold border transition ${
+              used
+                ? 'bg-slate-900 border-slate-800 text-slate-600 opacity-35'
+                : 'bg-slate-800 hover:bg-slate-700 border-slate-600 text-indigo-200 shadow'
+            }`;
+            btn.textContent = item.text;
+            btn.addEventListener('click', () => {
+              playSound('pop');
+              state.builderSelected.push(item);
+              refreshBuilderUI();
+            });
+            bankArea.appendChild(btn);
+          });
+        }
+
+        refreshBuilderUI();
+
+        document.getElementById('btn-clear-builder').addEventListener('click', () => {
+          state.builderSelected = [];
+          refreshBuilderUI();
+        });
+
+        document.getElementById('btn-check-builder').addEventListener('click', () => {
+          const userCode = state.builderSelected.map((i) => i.text).join(' ');
+          const targetCode = c.blocks.join(' ');
+          completeMission(c, userCode === targetCode);
+        });
+      }
+
+      // 3. BUG HUNTER GAME
+      function renderBugHunterGame(c, stage) {
+        setPyBot('🐛', 'Click the line of code that has a bug to squash it!');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-4';
+
+        const codeContainer = document.createElement('div');
+        codeContainer.className = 'bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-900';
+
+        const fixDrawer = document.createElement('div');
+        fixDrawer.className = 'hidden p-5 rounded-2xl bg-indigo-950/30 border border-indigo-500/40 space-y-3 animate-pop';
+
+        c.lines.forEach((lineText, idx) => {
+          const row = document.createElement('button');
+          row.type = 'button';
+          row.className = 'w-full text-left px-4 py-3 font-mono text-sm sm:text-base flex items-center gap-4 hover:bg-slate-900 transition group';
+          row.innerHTML = `
+            <span class="w-6 text-right text-xs text-slate-500 select-none">${idx + 1}</span>
+            <span class="flex-1 text-slate-200 group-hover:text-white whitespace-pre overflow-x-auto"></span>
+            <span class="bug-indicator text-xs font-sans font-bold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 opacity-0 group-hover:opacity-100 transition">🔍 Inspect Line</span>
+          `;
+          row.querySelector('span:nth-child(2)').textContent = lineText;
+
+          row.addEventListener('click', () => {
+            if (idx === c.bugLine) {
+              playSound('pop');
+              row.className = 'w-full text-left px-4 py-3 font-mono text-sm sm:text-base flex items-center gap-4 bg-rose-500/20 border-l-4 border-rose-500';
+              row.querySelector('.bug-indicator').textContent = '🐛 Bug Found!';
+              row.querySelector('.bug-indicator').className = 'bug-indicator text-xs font-sans font-bold px-2.5 py-1 rounded-lg bg-rose-500 text-white opacity-100';
+              setPyBot('🎯', 'You spotted the buggy line! Now pick the correct patch below:');
+              showFixOptions();
+            } else {
+              playSound('wrong');
+              row.querySelector('.bug-indicator').textContent = '✓ Line OK';
+              row.querySelector('.bug-indicator').className = 'bug-indicator text-xs font-sans font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 opacity-100';
+              setPyBot('🤔', `Line ${idx + 1} is valid Python! Look closely at the other lines.`);
+            }
+          });
+          codeContainer.appendChild(row);
+        });
+
+        function showFixOptions() {
+          fixDrawer.classList.remove('hidden');
+          fixDrawer.innerHTML = `
+            <div class="text-xs font-bold uppercase tracking-wider text-indigo-300">🔧 Select the Correct Patch for Line ${c.bugLine + 1}:</div>
+            <div class="grid grid-cols-1 gap-2.5" id="fix-buttons-list"></div>
+          `;
+          const list = fixDrawer.querySelector('#fix-buttons-list');
+          c.fixes.forEach((fixStr, fIdx) => {
+            const fBtn = document.createElement('button');
+            fBtn.type = 'button';
+            fBtn.className = 'p-3.5 rounded-xl bg-slate-900 hover:bg-indigo-600/30 border border-slate-700 hover:border-indigo-400 text-left font-mono text-xs sm:text-sm text-emerald-200 transition';
+            fBtn.textContent = fixStr;
+            fBtn.addEventListener('click', () => {
+              completeMission(c, fIdx === c.correctFix);
+            });
+            list.appendChild(fBtn);
+          });
+        }
+
+        wrapper.appendChild(codeContainer);
+        wrapper.appendChild(fixDrawer);
+        stage.appendChild(wrapper);
+      }
+
+      // 4. TERMINAL OUTPUT PREDICTOR GAME
+      function renderTerminalGame(c, stage) {
+        setPyBot('⌨️', 'Act as the Python Interpreter! Type the exact output or click a quick-chip below.');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-4';
+
+        wrapper.innerHTML = `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 text-xs font-mono text-slate-400 flex items-center justify-between">
+              <span>script.py</span>
+              <span class="text-emerald-400">● Ready to Execute</span>
+            </div>
+            <pre class="p-4 font-mono text-sm sm:text-base text-indigo-100 overflow-x-auto"><code id="term-code-block"></code></pre>
+          </div>
+
+          <div class="bg-black border-2 border-slate-800 rounded-2xl p-4 font-mono">
+            <div class="text-xs text-emerald-400 mb-2">>>> Standard Output Terminal (stdout):</div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-emerald-400 font-bold">&gt;&gt;&gt;</span>
+              <input id="terminal-user-input" type="text" placeholder="Type exact output here..." class="flex-1 bg-slate-900 text-white px-3.5 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
+              <button id="btn-submit-terminal" type="button" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-extrabold text-xs sm:text-sm transition">
+                ▶ Execute
+              </button>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="text-xs text-slate-400 font-sans">Quick Tap:</span>
+              <div id="term-chips" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+        `;
+        stage.appendChild(wrapper);
+        document.getElementById('term-code-block').textContent = c.code;
+
+        const inputEl = document.getElementById('terminal-user-input');
+        const chipsBox = document.getElementById('term-chips');
+
+        (c.quickChips || []).forEach((chipVal) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'px-3 py-1 rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white text-xs font-mono border border-slate-700 transition';
+          chip.textContent = chipVal;
+          chip.addEventListener('click', () => {
+            inputEl.value = chipVal;
+            playSound('pop');
+          });
+          chipsBox.appendChild(chip);
+        });
+
+        function checkTerminal() {
+          const val = inputEl.value.trim();
+          const ok = c.acceptedAnswers.some((ans) => ans.trim() === val);
+          completeMission(c, ok);
+        }
+
+        document.getElementById('btn-submit-terminal').addEventListener('click', checkTerminal);
+        inputEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.stopPropagation();
+            checkTerminal();
+          }
+        });
+      }
+
+      // 5. FILL-IN-THE-BLANK CODE LAB
+      function renderFillBlankGame(c, stage) {
+        setPyBot('🧪', 'Fill in the missing Python keyword or method name to complete the program!');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-4';
+
+        wrapper.innerHTML = `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 font-mono text-sm sm:text-base text-indigo-100 leading-relaxed overflow-x-auto">
+            <span id="fb-before" class="whitespace-pre"></span><input id="fb-input" type="text" placeholder="???" class="mx-1 w-28 sm:w-36 bg-indigo-500/20 border-2 border-indigo-400 rounded-lg px-2.5 py-0.5 text-center text-amber-300 font-extrabold focus:outline-none focus:bg-indigo-500/30"><span id="fb-after" class="whitespace-pre"></span>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-800/40 border border-slate-800 rounded-2xl p-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold text-slate-400">Word Bank:</span>
+              <div id="fb-bank" class="flex flex-wrap gap-2"></div>
+            </div>
+            <button id="btn-check-fb" type="button" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm transition">
+              ✓ Verify Code
+            </button>
+          </div>
+        `;
+        stage.appendChild(wrapper);
+
+        document.getElementById('fb-before').textContent = c.codeBefore;
+        document.getElementById('fb-after').textContent = c.codeAfter;
+
+        const fbInput = document.getElementById('fb-input');
+        const bank = document.getElementById('fb-bank');
+
+        c.wordBank.forEach((word) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-indigo-200 hover:text-white font-mono text-xs font-bold border border-slate-700 transition';
+          b.textContent = word;
+          b.addEventListener('click', () => {
+            fbInput.value = word;
+            playSound('pop');
+          });
+          bank.appendChild(b);
+        });
+
+        function verifyFill() {
+          const val = fbInput.value.trim();
+          const ok = c.acceptedAnswers.includes(val);
+          completeMission(c, ok);
+        }
+
+        document.getElementById('btn-check-fb').addEventListener('click', verifyFill);
+        fbInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.stopPropagation();
+            verifyFill();
+          }
+        });
+      }
+
+      // 6. RAPID-FIRE BINARY SORTER MINI-GAME
+      function renderRapidSorterGame(c, stage) {
+        setPyBot('⚡', 'Rapid-Fire Sorter! Classify all 5 cards in this deck to clear the mission!');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-4';
+        stage.appendChild(wrapper);
+
+        function renderCurrentCard() {
+          const total = c.items.length;
+          const idx = state.rapidIndex;
+
+          if (idx >= total) {
+            const passed = state.rapidScore >= total - 1;
+            completeMission(c, passed, `You scored ${state.rapidScore} / ${total} in the Rapid Sorter!`);
+            return;
+          }
+
+          const item = c.items[idx];
+          wrapper.innerHTML = `
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400 px-1">
+              <span>Card ${idx + 1} of ${total}</span>
+              <span class="text-emerald-400 font-mono">Hits: ${state.rapidScore} / ${idx}</span>
+            </div>
+
+            <div class="p-8 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 border-2 border-indigo-500/40 text-center shadow-xl animate-pop">
+              <div class="text-xs uppercase tracking-widest text-indigo-400 font-bold mb-2">Inspect Expression</div>
+              <div class="text-2xl sm:text-3xl font-mono font-extrabold text-white py-3">${item.code}</div>
+              <div id="rapid-mini-feedback" class="text-xs font-medium text-slate-400 h-5 mt-2">Choose a category below:</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <button id="btn-rapid-left" type="button" class="p-4 rounded-2xl bg-rose-500/15 hover:bg-rose-500/30 border-2 border-rose-500/40 text-rose-200 font-extrabold text-sm sm:text-base transition transform hover:-translate-y-1">
+                ${c.leftLabel}
+              </button>
+              <button id="btn-rapid-right" type="button" class="p-4 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/30 border-2 border-emerald-500/40 text-emerald-200 font-extrabold text-sm sm:text-base transition transform hover:-translate-y-1">
+                ${c.rightLabel}
+              </button>
+            </div>
+          `;
+
+          function handleChoice(choseRight) {
+            const isCorrect = choseRight === item.isRight;
+            const miniFb = document.getElementById('rapid-mini-feedback');
+            if (isCorrect) {
+              state.rapidScore += 1;
+              playSound('pop');
+              miniFb.className = 'text-xs font-bold text-emerald-400 h-5 mt-2';
+              miniFb.textContent = `✓ Correct! ${item.note}`;
+            } else {
+              playSound('wrong');
+              miniFb.className = 'text-xs font-bold text-rose-400 h-5 mt-2';
+              miniFb.textContent = `✗ Oops! ${item.note}`;
+            }
+            setTimeout(() => {
+              state.rapidIndex += 1;
+              renderCurrentCard();
+            }, 650);
+          }
+
+          document.getElementById('btn-rapid-left').addEventListener('click', () => handleChoice(false));
+          document.getElementById('btn-rapid-right').addEventListener('click', () => handleChoice(true));
+        }
+
+        renderCurrentCard();
+      }
+
+      // ==================== CONTROLS & FILTERS ====================
+      function applyFilters(shuffle = false) {
+        let indices = [];
+        CHALLENGES.forEach((c, idx) => {
+          const typeMatch = state.activeGameType === 'all' || c.type === state.activeGameType;
+          const topicMatch = state.activeTopic === 'all' || c.topic === state.activeTopic;
+          if (typeMatch && topicMatch) indices.push(idx);
+        });
+        if (shuffle) indices.sort(() => Math.random() - 0.5);
+        state.filteredIndices = indices;
+        state.currentIndex = 0;
+        renderCurrentMission();
+      }
+
+      document.querySelectorAll('.gtype-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.activeGameType = btn.getAttribute('data-gtype');
+          document.querySelectorAll('.gtype-tab').forEach((b) => {
+            b.className = 'gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition';
+          });
+          btn.className = 'gtype-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow transition';
+          playSound('pop');
+          applyFilters(false);
+        });
+      });
+
+      document.getElementById('topic-select').addEventListener('change', (e) => {
+        state.activeTopic = e.target.value;
+        applyFilters(false);
+      });
+
+      document.getElementById('btn-shuffle').addEventListener('click', () => {
+        playSound('pop');
+        spawnToast('🔀 Missions Shuffled!', 'from-indigo-400 to-purple-500');
+        applyFilters(true);
+      });
+
+      document.getElementById('power-hint').addEventListener('click', () => {
+        const c = getCurrentChallenge();
+        if (!c) return;
+        state.hintsShown[c.id] = true;
+        playSound('pop');
+        setPyBot('💡', c.hint);
+        document.getElementById('arcade-hint-box').classList.remove('hidden');
+        document.getElementById('arcade-hint-text').textContent = c.hint;
+      });
+
+      function goNext() {
+        if (state.currentIndex < state.filteredIndices.length - 1) {
+          state.currentIndex += 1;
+          playSound('pop');
+          renderCurrentMission();
+        }
+      }
+      function goPrev() {
+        if (state.currentIndex > 0) {
+          state.currentIndex -= 1;
+          playSound('pop');
+          renderCurrentMission();
+        }
+      }
+
+      document.getElementById('btn-next-q').addEventListener('click', goNext);
+      document.getElementById('btn-prev-q').addEventListener('click', goPrev);
+      document.getElementById('btn-feedback-next').addEventListener('click', goNext);
+      document.getElementById('btn-retry-mission').addEventListener('click', () => {
+        playSound('pop');
+        renderCurrentMission();
+      });
+
+      document.getElementById('btn-sound').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('btn-sound').textContent = state.soundEnabled ? '🔊' : '🔇';
+      });
+
+      // Map Modal
+      const mapModal = document.getElementById('map-modal');
+      document.getElementById('btn-map-drawer').addEventListener('click', () => {
+        const grid = document.getElementById('map-grid');
+        grid.innerHTML = '';
+        CHALLENGES.forEach((c, idx) => {
+          const solved = state.solved[c.id];
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `p-3 rounded-2xl border text-left transition flex flex-col justify-between ${
+            solved
+              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200'
+              : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+          }`;
+          btn.innerHTML = `
+            <div class="flex items-center justify-between w-full text-xs font-mono font-bold">
+              <span>#${c.id}</span>
+              <span>${solved ? '✅' : '🎯'}</span>
+            </div>
+            <div class="text-[11px] font-bold mt-1 truncate">${c.typeLabel}</div>
+          `;
+          btn.addEventListener('click', () => {
+            state.activeGameType = 'all';
+            state.activeTopic = 'all';
+            state.filteredIndices = CHALLENGES.map((_, i) => i);
+            state.currentIndex = idx;
+            mapModal.classList.add('hidden');
+            mapModal.classList.remove('flex');
+            renderCurrentMission();
+          });
+          grid.appendChild(btn);
+        });
+        mapModal.classList.remove('hidden');
+        mapModal.classList.add('flex');
+      });
+      document.getElementById('btn-close-map').addEventListener('click', () => {
+        mapModal.classList.add('hidden');
+        mapModal.classList.remove('flex');
+      });
+
+      // Trophy Modal
+      const trophyModal = document.getElementById('trophy-modal');
+      document.getElementById('btn-celebrate').addEventListener('click', () => {
+        const solvedCount = Object.values(state.solved).filter(Boolean).length;
+        const rank = getRank(state.xp);
+        document.getElementById('modal-rank-emoji').textContent = rank.emoji;
+        document.getElementById('modal-rank-title').textContent = `Level ${rank.level} • ${rank.title}`;
+        document.getElementById('modal-xp').textContent = state.xp.toLocaleString();
+        document.getElementById('modal-best-streak').textContent = `${state.bestStreak} 🔥`;
+        document.getElementById('modal-accuracy').textContent = `${solvedCount} / ${CHALLENGES.length}`;
+
+        const badges = [
+          { title: 'Slice Master', desc: 'Solve a Slice Visualizer puzzle', icon: '🔪', ok: [1,2,3,4,5].some(id => state.solved[id]) },
+          { title: 'Code Architect', desc: 'Assemble blocks in Code Builder', icon: '🧩', ok: [6,7,8,9,10].some(id => state.solved[id]) },
+          { title: 'Bug Exterminator', desc: 'Squash a bug in Bug Hunter', icon: '🐛', ok: [11,12,13,14,15].some(id => state.solved[id]) },
+          { title: 'Human Compiler', desc: 'Predict exact Terminal Output', icon: '⌨️', ok: [16,17,18,19,20].some(id => state.solved[id]) },
+          { title: 'Combo Streaker', desc: 'Reach a 5x Combo Streak', icon: '🔥', ok: state.bestStreak >= 5 },
+          { title: 'Grand Champion', desc: 'Complete 20+ Training Missions', icon: '👑', ok: solvedCount >= 20 }
+        ];
+        document.getElementById('badges-grid').innerHTML = badges.map((b) => `
+          <div class="p-3 rounded-2xl border flex items-center gap-3 ${b.ok ? 'bg-indigo-500/20 border-indigo-500/40 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-500 opacity-60'}">
+            <span class="text-2xl">${b.icon}</span>
+            <div>
+              <div class="font-bold text-xs">${b.title}</div>
+              <div class="text-[11px] text-slate-400">${b.desc}</div>
+            </div>
+          </div>
+        `).join('');
+
+        trophyModal.classList.remove('hidden');
+        trophyModal.classList.add('flex');
+      });
+      document.getElementById('btn-close-trophy').addEventListener('click', () => {
+        trophyModal.classList.add('hidden');
+        trophyModal.classList.remove('flex');
+      });
+      document.getElementById('btn-celebrate-confetti').addEventListener('click', () => {
+        playSound('correct');
+        launchConfetti(90);
+      });
+
+      // Reset Modal
+      const resetModal = document.getElementById('reset-modal');
+      document.getElementById('btn-reset-all').addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+        resetModal.classList.add('flex');
+      });
+      document.getElementById('btn-cancel-reset').addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+      });
+      document.getElementById('btn-confirm-reset').addEventListener('click', () => {
+        state.solved = {};
+        state.hintsShown = {};
+        state.xp = 0;
+        state.streak = 0;
+        state.currentIndex = 0;
+        saveState();
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+        renderCurrentMission();
+        spawnToast('↺ Lab Progress Reset!', 'from-rose-400 to-pink-500');
+      });
+
+      // Compatibility listeners for hidden buttons
+      [
+        'btn-mode-arcade', 'btn-mode-exam', 'btn-timer-toggle', 'power-5050',
+        'power-shield', 'btn-flag-current', 'btn-copy-code', 'btn-exam-grade-all',
+        'btn-exam-toggle-exp', 'btn-exam-toggle-key', 'btn-print-exam', 'search-input',
+        'btn-compat-1', 'btn-compat-2', 'btn-compat-3', 'btn-compat-4', 'btn-compat-5', 'btn-compat-6'
+      ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => { renderCurrentMission(); });
+      });
+
+      renderCurrentMission();
+    })();
+  </script>
+</body>
+</html>
